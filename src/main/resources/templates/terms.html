@@ -1,0 +1,362 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle != null} ? ${pageTitle} : 'Terms & Privacy - Axes Hospital'">Terms & Privacy - Axes Hospital</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* (your full CSS copied exactly) */
+        *{box-sizing:border-box;margin:0;padding:0}
+        html{scroll-behavior:smooth}
+        body{font-family:'Poppins',sans-serif;color:#1e293b;background:#0a0e27;overflow-x:hidden}
+        body::before{content:'';position:fixed;top:0;left:0;width:100%;height:100%;background:radial-gradient(circle at 20% 30%, rgba(139,92,246,0.2), transparent 40%),radial-gradient(circle at 80% 70%, rgba(59,130,246,0.2), transparent 40%),radial-gradient(circle at 50% 50%, rgba(16,185,129,0.1), transparent 50%);animation:drift 25s ease-in-out infinite;z-index:0}
+        @keyframes drift{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(40px,-40px) scale(1.05)}66%{transform:translate(-30px,30px) scale(0.95)}}
+        body::after{content:'';position:fixed;top:0;left:0;width:100%;height:100%;background-image:repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(255,255,255,0.02) 40px, rgba(255,255,255,0.02) 42px),repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(255,255,255,0.02) 40px, rgba(255,255,255,0.02) 42px);pointer-events:none;z-index:0}
+        .orb{position:fixed;border-radius:50%;filter:blur(80px);opacity:0.4;pointer-events:none;z-index:0}
+        .orb-1{width:350px;height:350px;background:linear-gradient(135deg,#667eea,#764ba2);top:-80px;left:-80px;animation:float1 20s ease-in-out infinite}
+        .orb-2{width:300px;height:300px;background:linear-gradient(135deg,#f093fb,#f5576c);bottom:-60px;right:-60px;animation:float2 25s ease-in-out infinite}
+        @keyframes float1{0%,100%{transform:translate(0,0)}50%{transform:translate(80px,80px)}}
+        @keyframes float2{0%,100%{transform:translate(0,0)}50%{transform:translate(-60px,-60px)}}
+        .nav-tabs{position:sticky;top:20px;z-index:100;max-width:1200px;margin:40px auto 20px;padding:0 20px}
+        .tabs-container{background:rgba(255,255,255,0.98);backdrop-filter:blur(30px);border-radius:16px;padding:8px;display:flex;gap:8px;box-shadow:0 10px 30px rgba(0,0,0,0.2);border:1px solid rgba(255,255,255,0.2);overflow-x:auto}
+        .tab-btn{padding:12px 24px;border:none;background:transparent;color:#64748b;font-weight:600;font-size:15px;border-radius:10px;cursor:pointer;transition:all 0.3s ease;white-space:nowrap;font-family:'Poppins',sans-serif}
+        .tab-btn:hover{background:rgba(102,126,234,0.1);color:#667eea}
+        .tab-btn.active{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;box-shadow:0 4px 12px rgba(102,126,234,0.3)}
+        .container{max-width:1200px;margin:0 auto 60px;padding:0 20px;position:relative;z-index:10}
+        .header{text-align:center;margin-bottom:40px;animation:fadeInDown 1s ease-out}
+        .header-badge{display:inline-block;padding:10px 24px;background:rgba(102,126,234,0.1);border:2px solid rgba(102,126,234,0.3);border-radius:50px;color:#a5b4fc;font-size:14px;font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-bottom:24px}
+        .header h1{font-size:clamp(32px,5vw,48px);font-weight:800;background:linear-gradient(135deg,#667eea 0%,#764ba2 50%,#f093fb 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:16px;letter-spacing:-1px}
+        .header p{font-size:16px;color:rgba(255,255,255,0.7);max-width:700px;margin:0 auto;line-height:1.6}
+        .content-section{display:none;animation:fadeInUp 0.6s ease-out}
+        .content-section.active{display:block}
+        .content-card{background:rgba(255,255,255,0.98);backdrop-filter:blur(30px);border-radius:24px;padding:50px;box-shadow:0 30px 60px rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.2);margin-bottom:30px}
+        .section-title{font-size:32px;font-weight:700;color:#1e293b;margin-bottom:12px;display:flex;align-items:center;gap:14px}
+        .section-title i{width:48px;height:48px;background:linear-gradient(135deg,#667eea,#764ba2);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff;flex-shrink:0}
+        .section-subtitle{color:#64748b;font-size:16px;margin-bottom:32px;padding-left:62px}
+        .info-block{margin-bottom:36px}
+        .info-block h3{font-size:22px;font-weight:700;color:#1e293b;margin-bottom:16px;display:flex;align-items:center;gap:10px}
+        .info-block h3::before{content:'';width:4px;height:24px;background:linear-gradient(135deg,#667eea,#764ba2);border-radius:2px}
+        .info-block p{color:#475569;line-height:1.8;margin-bottom:14px;font-size:15px}
+        .info-list{list-style:none;padding:0;margin:20px 0}
+        .info-list li{padding:14px 20px 14px 50px;margin-bottom:12px;background:rgba(102,126,234,0.05);border-left:4px solid #667eea;border-radius:10px;position:relative;color:#334155;line-height:1.7}
+        .info-list li::before{content:'✓';position:absolute;left:18px;color:#667eea;font-weight:700;font-size:18px}
+        .highlight-box{background:linear-gradient(135deg,rgba(102,126,234,0.1),rgba(118,75,162,0.1));border:2px solid rgba(102,126,234,0.3);border-radius:16px;padding:24px;margin:24px 0}
+        .highlight-box h4{color:#667eea;font-size:18px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+        .highlight-box h4 i{font-size:20px}
+        .highlight-box p{color:#334155;line-height:1.7;margin:0}
+        .date-updated{text-align:center;color:rgba(255,255,255,0.6);font-size:14px;margin-top:40px;padding:20px;background:rgba(255,255,255,0.05);border-radius:12px}
+        @keyframes fadeInDown{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes fadeInUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+        @media (max-width:768px){.content-card{padding:30px 24px}.section-title{font-size:26px}.section-subtitle{padding-left:0;margin-top:12px}.tabs-container{justify-content:flex-start}}
+        @media (max-width:480px){.nav-tabs{margin:20px auto 20px}.info-list li{padding:12px 16px 12px 42px}}
+    </style>
+</head>
+<body>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs">
+        <div class="tabs-container">
+            <button class="tab-btn active" data-tab="terms">
+                <i class="fas fa-file-contract"></i> Terms of Service
+            </button>
+            <button class="tab-btn" data-tab="privacy">
+                <i class="fas fa-shield-alt"></i> Privacy Policy
+            </button>
+            <button class="tab-btn" data-tab="hipaa">
+                <i class="fas fa-user-shield"></i> HIPAA Compliance
+            </button>
+            <button class="tab-btn" data-tab="cookies">
+                <i class="fas fa-cookie-bite"></i> Cookie Policy
+            </button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="header">
+            <div class="header-badge">
+                <i class="fas fa-hospital"></i> Legal Information
+            </div>
+            <h1>Axes Hospital Management System</h1>
+            <p>Important legal information regarding the use of our hospital management system and your rights as a user</p>
+        </div>
+
+        <!-- Terms of Service Section -->
+        <div class="content-section active" id="terms">
+            <div class="content-card">
+                <h2 class="section-title">
+                    <i class="fas fa-file-contract"></i>
+                    Terms of Service
+                </h2>
+                <p class="section-subtitle">Last Updated: <span th:text="${lastUpdated != null} ? ${lastUpdated} : 'December 2024'">December 2024</span></p>
+
+                <div class="info-block">
+                    <h3>1. Acceptance of Terms</h3>
+                    <p>By accessing and using the Axes Hospital Management System (HMS), you acknowledge that you have read, understood, and agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our services.</p>
+                </div>
+
+                <div class="info-block">
+                    <h3>2. User Responsibilities</h3>
+                    <p>As a user of our HMS, you agree to:</p>
+                    <ul class="info-list">
+                        <li>Provide accurate and complete information during registration</li>
+                        <li>Maintain the confidentiality of your account credentials</li>
+                        <li>Use the system only for lawful healthcare-related purposes</li>
+                        <li>Respect patient privacy and confidentiality at all times</li>
+                        <li>Report any security breaches or unauthorized access immediately</li>
+                        <li>Comply with all applicable healthcare regulations and laws</li>
+                    </ul>
+                </div>
+
+                <div class="info-block">
+                    <h3>3. Service Availability</h3>
+                    <p>While we strive to provide uninterrupted service, we cannot guarantee 100% uptime. The HMS may be temporarily unavailable due to maintenance, updates, or unforeseen technical issues. We will make reasonable efforts to provide advance notice of scheduled maintenance.</p>
+                </div>
+
+                <div class="highlight-box">
+                    <h4><i class="fas fa-exclamation-triangle"></i> Important Notice</h4>
+                    <p>Emergency medical situations should never rely solely on this system. Always contact emergency services (911 or your local emergency number) for life-threatening situations.</p>
+                </div>
+
+                <div class="info-block">
+                    <h3>4. Intellectual Property</h3>
+                    <p>All content, features, and functionality of the HMS, including but not limited to text, graphics, logos, and software, are the exclusive property of Axes Hospital and are protected by copyright, trademark, and other intellectual property laws.</p>
+                </div>
+
+                <div class="info-block">
+                    <h3>5. Limitation of Liability</h3>
+                    <p>Axes Hospital and its affiliates shall not be liable for any indirect, incidental, special, consequential, or punitive damages resulting from your use of or inability to use the HMS, even if we have been advised of the possibility of such damages.</p>
+                </div>
+
+                <div class="info-block">
+                    <h3>6. Modifications to Service</h3>
+                    <p>We reserve the right to modify, suspend, or discontinue any aspect of the HMS at any time without prior notice. We may also update these Terms of Service periodically, and continued use of the system constitutes acceptance of such changes.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Privacy Policy Section -->
+        <div class="content-section" id="privacy">
+            <div class="content-card">
+                <h2 class="section-title">
+                    <i class="fas fa-shield-alt"></i>
+                    Privacy Policy
+                </h2>
+                <p class="section-subtitle">Your privacy is our top priority</p>
+
+                <div class="info-block">
+                    <h3>1. Information We Collect</h3>
+                    <p>We collect several types of information to provide and improve our services:</p>
+                    <ul class="info-list">
+                        <li><strong>Personal Information:</strong> Name, date of birth, contact details, and identification numbers</li>
+                        <li><strong>Medical Information:</strong> Health records, diagnoses, treatments, and prescriptions</li>
+                        <li><strong>Usage Data:</strong> Login times, pages accessed, and system interactions</li>
+                        <li><strong>Device Information:</strong> IP address, browser type, and operating system</li>
+                        <li><strong>Communication Data:</strong> Messages sent through the system</li>
+                    </ul>
+                </div>
+
+                <div class="info-block">
+                    <h3>2. How We Use Your Information</h3>
+                    <p>Your information is used for the following purposes:</p>
+                    <ul class="info-list">
+                        <li>Providing healthcare services and managing medical records</li>
+                        <li>Facilitating communication between patients and healthcare providers</li>
+                        <li>Improving system functionality and user experience</li>
+                        <li>Ensuring security and preventing fraud or abuse</li>
+                        <li>Complying with legal and regulatory requirements</li>
+                        <li>Generating anonymized data for research and statistical analysis</li>
+                    </ul>
+                </div>
+
+                <div class="highlight-box">
+                    <h4><i class="fas fa-lock"></i> Data Security</h4>
+                    <p>We implement industry-standard security measures including end-to-end encryption, secure data centers, regular security audits, and strict access controls to protect your information from unauthorized access, alteration, or disclosure.</p>
+                </div>
+
+                <div class="info-block">
+                    <h3>3. Information Sharing</h3>
+                    <p>We do not sell your personal information. We may share your data only in the following circumstances:</p>
+                    <ul class="info-list">
+                        <li>With healthcare providers involved in your care</li>
+                        <li>With your explicit consent</li>
+                        <li>To comply with legal obligations or court orders</li>
+                        <li>With service providers who assist in operating the HMS (under strict confidentiality agreements)</li>
+                        <li>In emergency situations to protect health and safety</li>
+                    </ul>
+                </div>
+
+                <div class="info-block">
+                    <h3>4. Your Privacy Rights</h3>
+                    <p>You have the right to:</p>
+                    <ul class="info-list">
+                        <li>Access your personal and medical information</li>
+                        <li>Request corrections to inaccurate data</li>
+                        <li>Request deletion of your data (subject to legal requirements)</li>
+                        <li>Opt-out of non-essential communications</li>
+                        <li>Receive a copy of your data in a portable format</li>
+                        <li>Lodge a complaint with relevant data protection authorities</li>
+                    </ul>
+                </div>
+
+                <div class="info-block">
+                    <h3>5. Data Retention</h3>
+                    <p>We retain your information for as long as necessary to provide services and comply with legal obligations. Medical records are typically retained for a minimum of 7 years as required by law, while other data may be retained for shorter periods.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- HIPAA Compliance Section -->
+        <div class="content-section" id="hipaa">
+            <div class="content-card">
+                <h2 class="section-title">
+                    <i class="fas fa-user-shield"></i>
+                    HIPAA Compliance
+                </h2>
+                <p class="section-subtitle">Protecting your health information rights</p>
+
+                <div class="info-block">
+                    <h3>1. HIPAA Overview</h3>
+                    <p>The Health Insurance Portability and Accountability Act (HIPAA) is a federal law that protects the privacy and security of your health information. Axes Hospital is fully committed to HIPAA compliance and protecting your Protected Health Information (PHI).</p>
+                </div>
+
+                <div class="info-block">
+                    <h3>2. Protected Health Information (PHI)</h3>
+                    <p>PHI includes any information about your health status, healthcare provision, or payment that can identify you. This includes:</p>
+                    <ul class="info-list">
+                        <li>Medical records and test results</li>
+                        <li>Billing and insurance information</li>
+                        <li>Photos, X-rays, and diagnostic images</li>
+                        <li>Prescription and treatment plans</li>
+                        <li>Any combination of health data with identifying information</li>
+                    </ul>
+                </div>
+
+                <div class="highlight-box">
+                    <h4><i class="fas fa-check-circle"></i> Our HIPAA Commitments</h4>
+                    <p>We maintain comprehensive HIPAA compliance through technical safeguards (encryption, access controls), physical safeguards (secure facilities, device security), administrative safeguards (staff training, policies), and regular compliance audits.</p>
+                </div>
+
+                <div class="info-block">
+                    <h3>3. Your HIPAA Rights</h3>
+                    <p>Under HIPAA, you have the right to:</p>
+                    <ul class="info-list">
+                        <li>Access and obtain copies of your medical records</li>
+                        <li>Request amendments to your health information</li>
+                        <li>Receive an accounting of disclosures of your PHI</li>
+                        <li>Request restrictions on use and disclosure of your PHI</li>
+                        <li>Request confidential communications</li>
+                        <li>File a complaint if you believe your privacy rights have been violated</li>
+                    </ul>
+                </div>
+
+                <div class="info-block">
+                    <h3>4. Permitted Uses and Disclosures</h3>
+                    <p>We may use and disclose your PHI without authorization for:</p>
+                    <ul class="info-list">
+                        <li>Treatment, payment, and healthcare operations</li>
+                        <li>Public health activities and disease reporting</li>
+                        <li>Health oversight activities and audits</li>
+                        <li>Legal proceedings and law enforcement purposes</li>
+                        <li>Research with proper authorization or waiver</li>
+                        <li>Preventing serious threats to health or safety</li>
+                    </ul>
+                </div>
+
+                <div class="info-block">
+                    <h3>5. Breach Notification</h3>
+                    <p>In the unlikely event of a breach of your PHI, we will notify you and relevant authorities in accordance with HIPAA requirements, typically within 60 days of discovering the breach.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cookie Policy Section -->
+        <div class="content-section" id="cookies">
+            <div class="content-card">
+                <h2 class="section-title">
+                    <i class="fas fa-cookie-bite"></i>
+                    Cookie Policy
+                </h2>
+                <p class="section-subtitle">Understanding how we use cookies</p>
+
+                <div class="info-block">
+                    <h3>1. What Are Cookies?</h3>
+                    <p>Cookies are small text files stored on your device when you visit our website. They help us provide a better user experience, remember your preferences, and analyze how you use our system.</p>
+                </div>
+
+                <div class="info-block">
+                    <h3>2. Types of Cookies We Use</h3>
+                    <ul class="info-list">
+                        <li><strong>Essential Cookies:</strong> Required for the HMS to function properly, including login sessions and security features</li>
+                        <li><strong>Performance Cookies:</strong> Help us understand how users interact with the system to improve functionality</li>
+                        <li><strong>Functional Cookies:</strong> Remember your preferences and settings for a personalized experience</li>
+                        <li><strong>Analytics Cookies:</strong> Provide statistical information about system usage and performance</li>
+                    </ul>
+                </div>
+
+                <div class="info-block">
+                    <h3>3. Third-Party Cookies</h3>
+                    <p>We may use third-party services that set cookies on our behalf, such as analytics providers. These third parties are contractually obligated to use cookies only for the purposes we specify and must comply with our privacy standards.</p>
+                </div>
+
+                <div class="highlight-box">
+                    <h4><i class="fas fa-cog"></i> Cookie Management</h4>
+                    <p>You can control and manage cookies through your browser settings. However, disabling essential cookies may affect your ability to use certain features of the HMS. Most browsers allow you to refuse cookies, delete existing cookies, or be notified when new cookies are placed.</p>
+                </div>
+
+                <div class="info-block">
+                    <h3>4. Cookie Lifespan</h3>
+                    <p>We use both session cookies (deleted when you close your browser) and persistent cookies (stored for a specified period). Persistent cookies help us remember your preferences and improve your experience on return visits.</p>
+                </div>
+
+                <div class="info-block">
+                    <h3>5. Updates to Cookie Policy</h3>
+                    <p>We may update this Cookie Policy from time to time to reflect changes in technology or legal requirements. We encourage you to review this policy periodically.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="date-updated">
+            <p><i class="fas fa-calendar-alt"></i> Last Updated: <span th:text="${lastUpdated != null} ? ${lastUpdated} : 'December 3, 2024'">December 3, 2024</span></p>
+            <p style="margin-top:8px">For questions or concerns about these policies, please contact our Privacy Officer at <a th:href="${privacyEmail != null} ? ${'mailto:' + privacyEmail} : 'mailto:privacy@Axes.com' " th:text="${privacyEmail != null} ? ${privacyEmail} : 'privacy@Axes.com'">privacy@Axes.com</a></p>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        // Tab switching functionality
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        const contentSections = document.querySelectorAll('.content-section');
+
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const targetTab = button.getAttribute('data-tab');
+
+                // Remove active class from all tabs and sections
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                contentSections.forEach(section => section.classList.remove('active'));
+
+                // Add active class to clicked tab and corresponding section
+                button.classList.add('active');
+                document.getElementById(targetTab).classList.add('active');
+
+                // Scroll to top smoothly
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        });
+
+        // Smooth scroll for internal links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

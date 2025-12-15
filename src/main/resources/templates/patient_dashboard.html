@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title th:text="${patientName != null ? patientName + ' · Patient Dashboard' : 'Patient Dashboard'}">Patient Dashboard</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+
+    <style>
+        /* Core Reset & Font */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { font-family: 'Poppins', sans-serif; color: #1e293b; background: #f6f8fb; min-height: 100vh; }
+
+        /* Background Decorations */
+        .orb { position: fixed; border-radius: 50%; filter: blur(80px); opacity: 0.25; pointer-events: none; z-index: -1; }
+        .orb-1 { width: 380px; height: 380px; background: linear-gradient(135deg, #667eea, #764ba2); top: -120px; left: -120px; }
+        .orb-2 { width: 340px; height: 340px; background: linear-gradient(135deg, #f093fb, #f5576c); bottom: -120px; right: -120px; }
+
+        /* Header */
+        header { background: linear-gradient(135deg, #667eea, #764ba2); padding: 26px; color: #fff; box-shadow: 0 4px 20px rgba(102, 126, 234, 0.2); }
+        .header-content { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+        
+        .profile { display: flex; align-items: center; gap: 14px; }
+        .avatar { width: 64px; height: 64px; border-radius: 12px; background: #fff; color: #667eea; display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: 700; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .greeting h1 { font-size: 20px; font-weight: 700; line-height: 1.2; }
+        .greeting p { color: rgba(255, 255, 255, 0.9); font-size: 13px; margin-top: 4px; }
+
+        /* Buttons */
+        .btn { display: inline-flex; gap: 10px; align-items: center; padding: 10px 18px; border-radius: 10px; background: #fff; color: #333; text-decoration: none; border: none; font-weight: 600; font-size: 14px; transition: transform 0.2s; cursor: pointer; }
+        .btn:hover { transform: translateY(-2px); }
+        .btn-secondary { background: rgba(255, 255, 255, 0.2); color: #fff; backdrop-filter: blur(5px); }
+        .btn-secondary:hover { background: rgba(255, 255, 255, 0.3); }
+
+        /* Layout */
+        .wrapper { max-width: 1200px; margin: 26px auto; padding: 0 18px; }
+        .grid { display: grid; grid-template-columns: 1fr 360px; gap: 24px; }
+        @media(max-width: 980px) { .grid { grid-template-columns: 1fr; } }
+
+        /* Cards */
+        .card { background: #fff; border-radius: 16px; padding: 24px; box-shadow: 0 10px 30px rgba(15, 23, 36, 0.04); border: 1px solid rgba(15, 23, 36, 0.03); }
+        .card + .card { margin-top: 20px; }
+        h2 { font-size: 18px; margin-bottom: 16px; color: #0f1724; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+
+        /* Tables & Lists */
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; color: #64748b; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; padding: 12px 10px; border-bottom: 2px solid #f1f5f9; }
+        td { padding: 14px 10px; border-bottom: 1px solid #f1f5f9; font-size: 14px; vertical-align: middle; }
+        tr:last-child td { border-bottom: none; }
+        
+        /* Forms */
+        .form-inline { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+        .form-inline input[type=datetime-local] { padding: 8px 12px; border-radius: 8px; border: 1px solid #e2e8f0; font-family: inherit; color: #334155; outline: none; }
+        .form-inline input:focus { border-color: #667eea; ring: 2px solid rgba(102,126,234,0.1); }
+        .form-inline button { background: #667eea; color: white; padding: 8px 16px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+        .form-inline button:hover { background: #5a67d8; }
+
+        /* Messages & States */
+        .empty { padding: 30px; text-align: center; color: #64748b; background: #f8fafc; border-radius: 12px; border: 1px dashed #cbd5e1; }
+        .msg { padding: 14px; border-radius: 8px; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+        .error { padding: 14px; border-radius: 8px; background: #fff1f2; color: #be123c; border: 1px solid #fecaca; margin-bottom: 16px; }
+        
+        /* Message Item */
+        .message-item { padding: 16px; border-radius: 12px; background: #fff; border: 1px solid #e2e8f0; margin-bottom: 12px; transition: transform 0.2s; }
+        .message-item:hover { border-color: #cbd5e1; }
+        .message-header { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 13px; }
+        .sender { font-weight: 700; color: #667eea; }
+        .timestamp { color: #94a3b8; }
+        
+        /* Sidebar Stats / Profile */
+        .stat-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f1f5f9; }
+        .stat-row:last-child { border-bottom: none; }
+        .stat-label { color: #64748b; font-size: 13px; }
+        .stat-value { font-weight: 700; color: #1e293b; }
+
+        .profile-list { list-style: none; padding: 0; margin: 0; }
+        .profile-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed #e2e8f0; font-size: 14px; }
+        .profile-item:last-child { border-bottom: none; }
+        .profile-label { color: #64748b; }
+        .profile-value { font-weight: 600; color: #0f172a; text-align: right; }
+
+        footer { max-width: 1200px; margin: 30px auto; text-align: center; color: #94a3b8; font-size: 13px; }
+
+        /* 🔹 Doctor photo in "Book an Appointment" table */
+        .doctor-cell {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .doctor-photo-wrapper {
+            width: 44px;
+            height: 44px;
+            border-radius: 999px;
+            overflow: hidden;
+            flex-shrink: 0;
+            background: #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .doctor-photo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .doctor-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .doctor-name {
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        .doctor-id {
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        .doctor-specialty {
+            font-size: 13px;
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        .doctor-email {
+            font-size: 12px;
+            color: #64748b;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <header>
+        <div class="header-content">
+            <div class="profile">
+                <div class="avatar" th:text="${patientName != null ? patientName.substring(0,1).toUpperCase() : 'P'}">P</div>
+                <div class="greeting">
+                    <h1 th:text="${patientName != null ? 'Welcome, ' + patientName : 'Welcome, Patient'}">Welcome, Patient</h1>
+                    <p>Manage your health journey.</p>
+                </div>
+            </div>
+
+            <div style="display:flex; gap:10px">
+                <a th:href="@{/patient/records}" class="btn btn-secondary"><i class="fas fa-file-medical"></i> Records</a>
+                <a th:href="@{/patient/logout}" class="btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="wrapper">
+        <div class="grid">
+            
+            <section>
+                
+                <div th:if="${msg != null}" class="msg">
+                    <i class="fas fa-check-circle"></i> <span th:text="${msg}">Success message</span>
+                </div>
+                <div th:if="${error != null}" class="error">
+                    <i class="fas fa-exclamation-circle"></i> <span th:text="${error}">Error message</span>
+                </div>
+
+                <div class="card">
+                    <h2><i class="fas fa-user-md" style="color:#667eea"></i> Book an Appointment</h2>
+
+                    <div th:if="${doctors == null or #lists.isEmpty(doctors)}" class="empty">
+                        <i class="far fa-calendar-times" style="font-size: 24px; margin-bottom: 10px; display:block"></i>
+                        No doctors are available for booking right now.
+                    </div>
+
+                    <div th:if="${doctors != null and !#lists.isEmpty(doctors)}" style="overflow-x: auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Doctor</th>
+                                    <th>Specialty / Email</th>
+                                    <th>Select Time</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="doc : ${doctors}">
+                                    <!-- 🔹 Doctor photo + name + id -->
+                                    <td>
+                                        <div class="doctor-cell">
+                                            <div class="doctor-photo-wrapper">
+                                                <img th:if="${doc.photoPath != null}"
+                                                     th:src="@{${doc.photoPath}}"
+                                                     alt="Doctor photo"
+                                                     class="doctor-photo">
+                                                <div th:if="${doc.photoPath == null}" class="doctor-avatar">
+                                                    <i class="fas fa-user-md"></i>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <div class="doctor-name" th:text="${doc.name}">Dr. Name</div>
+                                                <div class="doctor-id" th:text="${'ID: ' + doc.id}">ID: 1</div>
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    <!-- 🔹 Specialization + email -->
+                                    <td>
+                                        <div class="doctor-specialty"
+                                             th:text="${#strings.isEmpty(doc.specialization) ? 'Not specified' : doc.specialization}">
+                                            Specialization
+                                        </div>
+                                        <div class="doctor-email" th:text="${doc.email}">email@example.com</div>
+                                    </td>
+
+                                    <td>
+                                        <form th:action="@{/patient/appointments/book}" method="post" class="form-inline">
+                                            <input type="hidden" name="doctorId" th:value="${doc.id}" />
+                                            <input type="datetime-local" name="time" required />
+                                            <button type="submit">Book</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div style="margin-top:12px; text-align: right;">
+                            <small style="color:#64748b"><i class="fas fa-info-circle"></i> Enter date & time in your local timezone.</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2><i class="fas fa-prescription-bottle-alt" style="color:#f5576c"></i> Recent Prescriptions</h2>
+
+                    <div th:if="${prescriptions != null and !#lists.isEmpty(prescriptions)}">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Doctor</th>
+                                    <th>Date</th>
+                                    <th>Details</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="p : ${prescriptions}">
+                                    <td th:text="${p.doctorName}">Dr. Smith</td>
+                                    <td th:text="${p.date != null ? #temporals.format(p.date, 'dd MMM yyyy') : '-'}">02 Dec 2025</td>
+                                    <td th:text="${p.summary}">Medicine Details</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div th:if="${prescriptions == null or #lists.isEmpty(prescriptions)}" class="empty">
+                        No active prescriptions found.
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2><i class="fas fa-envelope" style="color:#10b981"></i> Messages</h2>
+
+                    <div th:if="${messages != null and !#lists.isEmpty(messages)}">
+                        <div th:each="m : ${messages}" class="message-item">
+                            <div class="message-header">
+                                <span class="sender" th:text="${m.from}">Clinic</span>
+                                <span class="timestamp" th:text="${m.sentAt != null ? #temporals.format(m.sentAt, 'dd MMM HH:mm') : ''}">Today</span>
+                            </div>
+                            <div style="color:#334155; line-height: 1.5;" th:text="${m.text}">
+                                Message content goes here.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div th:if="${messages == null or #lists.isEmpty(messages)}" class="empty">
+                        You have no new messages.
+                    </div>
+                </div>
+
+            </section>
+
+            <aside>
+                <!-- Patient Profile card -->
+                <div class="card" th:if="${patient != null}">
+                    <h2><i class="fas fa-id-card" style="color:#0ea5e9"></i> Your Profile</h2>
+                    <ul class="profile-list">
+                        <li class="profile-item">
+                            <span class="profile-label">Name</span>
+                            <span class="profile-value" th:text="${patient.name}">John Doe</span>
+                        </li>
+                        <li class="profile-item">
+                            <span class="profile-label">Age</span>
+                            <span class="profile-value" th:text="${patient.age}">30</span>
+                        </li>
+                        <li class="profile-item">
+                            <span class="profile-label">Gender</span>
+                            <span class="profile-value" th:text="${patient.gender}">Male</span>
+                        </li>
+                        <li class="profile-item">
+                            <span class="profile-label">Phone</span>
+                            <span class="profile-value" th:text="${patient.phone}">+91 98765 43210</span>
+                        </li>
+                        <li class="profile-item">
+                            <span class="profile-label">Email</span>
+                            <span class="profile-value" th:text="${patient.email}">john@example.com</span>
+                        </li>
+                        <li class="profile-item">
+                            <span class="profile-label">Address</span>
+                            <span class="profile-value" th:text="${patient.address}">Full address here</span>
+                        </li>
+                        <li class="profile-item">
+                            <span class="profile-label">Problem</span>
+                            <span class="profile-value" th:text="${patient.disease}">Fever</span>
+                        </li>
+                    </ul>
+
+                    <div style="margin-top:16px;">
+                        <a th:href="@{/patient/details}" class="btn" style="width:100%; justify-content:center; background:#eff6ff; border:1px solid #dbeafe;">
+                            <i class="fas fa-pen"></i> Edit Profile
+                        </a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>Quick Summary</h2>
+                    
+                    <div class="stat-row">
+                        <span class="stat-label">Next Appointment</span>
+                        <span class="stat-value" th:text="${nextAppointmentDate != null ? #temporals.format(nextAppointmentDate, 'dd MMM') : 'None'}">-</span>
+                    </div>
+
+                    <div class="stat-row">
+                        <span class="stat-label">Active Prescriptions</span>
+                        <span class="stat-value" th:text="${prescriptions != null ? prescriptions.size() : 0}">0</span>
+                    </div>
+                    
+                    <div class="stat-row">
+                        <span class="stat-label">Unread Messages</span>
+                        <span class="stat-value" th:text="${messages != null ? messages.size() : 0}">0</span>
+                    </div>
+
+                    <div style="margin-top:20px">
+                        <a th:href="@{/patient/appointments}" class="btn" style="width:100%; justify-content:center; background:#f1f5f9; border:1px solid #e2e8f0;">
+                            View All Appointments
+                        </a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>Health Tips</h2>
+                    <ul style="padding-left: 20px; color:#475569; line-height: 1.6; font-size: 14px;">
+                        <li>Drink 8 glasses of water daily.</li>
+                        <li>Take medications on time.</li>
+                        <li>Ensure you get 7-8 hours of sleep.</li>
+                    </ul>
+                </div>
+            </aside>
+
+        </div>
+    </main>
+
+    <footer>
+        &copy; <span th:text="${year != null ? year : 2025}">2025</span> MediCare System. All rights reserved.
+    </footer>
+
+</body>
+</html>

@@ -1,0 +1,58 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8"/>
+  <title th:text="'Record #' + ${record.id}">Record Details</title>
+  <style>
+    body{font-family:Arial,Helvetica,sans-serif;background:#f6f8fb;padding:24px;color:#1f2937}
+    .container{max-width:900px;margin:0 auto}
+    .card{background:#fff;padding:18px;border-radius:8px;box-shadow:0 6px 20px rgba(15,23,36,0.06)}
+    h1{margin-bottom:8px}
+    .meta{color:#64748b;margin-bottom:12px}
+    .section{margin-top:14px}
+    .files a{display:inline-block;padding:8px 10px;background:#eef2ff;color:#334155;border-radius:6px;margin-right:8px;text-decoration:none}
+    .btn{display:inline-block;padding:8px 12px;background:#667eea;color:#fff;border-radius:8px;text-decoration:none}
+    .small{font-size:13px;color:#6b7280}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a th:href="@{/patient/records}" class="btn">← Back to Records</a>
+    <div style="height:12px"></div>
+
+    <div class="card">
+      <h1 th:text="'Record #' + ${record.id}">Record #1</h1>
+      <div class="meta">
+        <span th:text="${record.recordDate != null ? #temporals.format(record.recordDate,'dd MMM yyyy') : '-'}">-</span>
+        &nbsp;•&nbsp;
+        <span th:text="${record.doctor != null ? record.doctor.name : '-'}">-</span>
+      </div>
+
+      <div class="section">
+        <h3>Diagnosis</h3>
+        <div th:text="${record.diagnosis != null ? record.diagnosis : '-'}">-</div>
+      </div>
+
+      <div class="section">
+        <h3>Prescription</h3>
+        <div th:text="${record.prescription != null ? record.prescription : '-'}">-</div>
+      </div>
+
+      <div class="section">
+        <h3>Notes</h3>
+        <div th:text="${record.notes != null ? record.notes : '-'}">-</div>
+      </div>
+
+      <div class="section files">
+        <h3>Attachments</h3>
+        <div th:if="${record.reports != null and !#lists.isEmpty(record.reports)}">
+          <span th:each="rep : ${record.reports}">
+            <a th:href="@{|/records/files/${rep.id}|}" th:text="${rep.originalName != null ? rep.originalName : rep.fileName}">file.pdf</a>
+          </span>
+        </div>
+        <div th:if="${record.reports == null or #lists.isEmpty(record.reports)}" class="small">No files attached.</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,304 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8"/>
+  <title>Add Medical Record</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* RESET */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* ✅ NEW BACKGROUND COLOR (Teal → Purple) */
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #2dd4bf 0%, #6366f1 50%, #a855f7 100%) !important;
+      min-height: 100vh;
+      padding: 24px;
+      animation: fadeIn 0.8s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      animation: slideUp 0.7s ease-out;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ✅ HEADER */
+    .header {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(14px);
+      padding: 20px 32px;
+      border-radius: 20px;
+      margin-bottom: 24px;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .back-btn {
+      padding: 10px 16px;
+      background: rgba(255, 255, 255, 0.6);
+      color: #4f46e5;
+      text-decoration: none;
+      border-radius: 12px;
+      font-weight: 600;
+      transition: 0.3s ease;
+    }
+
+    .back-btn:hover {
+      background: rgba(255, 255, 255, 0.9);
+      transform: translateX(-6px);
+    }
+
+    /* ✅ CARD */
+    .card {
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(14px);
+      padding: 32px;
+      border-radius: 22px;
+      box-shadow: 0 14px 45px rgba(0, 0, 0, 0.25);
+      animation: fadeIn 1s ease-out;
+    }
+
+    /* ✅ SECTION TITLES */
+    .form-section-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #e5e7eb;
+      position: relative;
+    }
+
+    .form-section-title::after {
+      content: "";
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 0%;
+      height: 3px;
+      background: #4f46e5;
+      animation: growLine 1s forwards;
+    }
+
+    @keyframes growLine {
+      from { width: 0%; }
+      to { width: 100%; }
+    }
+
+    /* ✅ FORM INPUTS */
+    input[type=text],
+    textarea {
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: 14px;
+      border: 2px solid #e5e7eb;
+      font-size: 15px;
+      transition: 0.25s ease;
+      background: white;
+    }
+
+    input[type=text]:focus,
+    textarea:focus {
+      border-color: #4f46e5;
+      box-shadow: 0 0 10px rgba(79, 70, 229, 0.3);
+      transform: scale(1.02);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 110px;
+    }
+
+    /* ✅ FILE UPLOAD */
+    .file-upload-label {
+      padding: 28px;
+      border: 2px dashed #4f46e5;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.6);
+      cursor: pointer;
+      transition: 0.3s ease;
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .file-upload-label:hover {
+      background: rgba(79, 70, 229, 0.1);
+      transform: scale(1.03);
+    }
+
+    input[type=file] {
+      position: absolute;
+      left: -9999px;
+    }
+
+    .file-info {
+      margin-top: 8px;
+      font-size: 14px;
+      color: #6b7280;
+      transition: 0.3s ease;
+    }
+
+    /* ✅ BUTTONS */
+    .button-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 32px;
+      padding-top: 24px;
+      border-top: 2px solid #e5e7eb;
+    }
+
+    .btn {
+      padding: 14px 32px;
+      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+      color: white;
+      border-radius: 14px;
+      border: none;
+      font-weight: 700;
+      font-size: 16px;
+      cursor: pointer;
+      transition: 0.3s ease;
+      flex: 1;
+      box-shadow: 0 8px 20px rgba(79, 70, 229, 0.4);
+    }
+
+    .btn:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 28px rgba(79, 70, 229, 0.5);
+    }
+
+    .btn-secondary {
+      background: white;
+      color: #4f46e5;
+      border: 2px solid #4f46e5;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(79, 70, 229, 0.1);
+    }
+
+    /* ✅ INFO BOX */
+    .info-box {
+      background: rgba(16, 185, 129, 0.15);
+      border-left: 5px solid #059669;
+      padding: 16px;
+      border-radius: 12px;
+      margin-bottom: 24px;
+      display: flex;
+      gap: 12px;
+      font-size: 15px;
+      color: #065f46;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <a th:href="@{/doctor}" class="back-btn">← Back</a>
+      <h2>Add Medical Record</h2>
+    </div>
+
+    <div class="card">
+      <div class="info-box">
+        <span style="font-size: 22px;">💡</span>
+        <div>
+          <strong>Quick Tip:</strong> Fill in all relevant information to create a comprehensive medical record.
+        </div>
+      </div>
+
+      <form th:action="@{/doctor/records}" method="post" enctype="multipart/form-data">
+        <input type="hidden" name="doctorId" th:value="${doctorId}" />
+
+        <!-- Patient Info -->
+        <div class="form-section">
+          <div class="form-section-title">👤 Patient Information</div>
+
+          <div class="form-row">
+            <div>
+              <label>Patient ID <span style="color: red">*</span></label>
+              <input type="text" name="patientId" th:value="${patient != null ? patient.id : ''}" required />
+            </div>
+
+            <div>
+              <label>Appointment ID (optional)</label>
+              <input type="text" name="appointmentId" th:value="${appointment != null ? appointment.id : ''}" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Medical Details -->
+        <div class="form-section">
+          <div class="form-section-title">🩺 Medical Details</div>
+
+          <label>Diagnosis</label>
+          <textarea name="diagnosis"></textarea>
+
+          <label>Prescription</label>
+          <textarea name="prescription"></textarea>
+
+          <label>Additional Notes</label>
+          <textarea name="notes"></textarea>
+        </div>
+
+        <!-- Attachments -->
+        <div class="form-section">
+          <div class="form-section-title">📎 Attachments</div>
+
+          <label>Upload Files</label>
+          <div class="file-upload-wrapper">
+            <label for="file-input" class="file-upload-label">
+              <span style="font-size: 26px;">📁</span>
+              <span>Click to upload or drag & drop</span>
+            </label>
+            <input type="file" id="file-input" name="files" multiple />
+          </div>
+
+          <div class="file-info">ℹ️ Supported formats: PDF, JPG, PNG, JPEG</div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="button-group">
+          <button type="submit" class="btn">✓ Save Medical Record</button>
+          <a th:href="@{/doctor}" class="btn btn-secondary">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('file-input').addEventListener('change', function(e) {
+      const fileInfo = document.querySelector('.file-info');
+      const files = e.target.files;
+
+      if (files.length > 0) {
+        const names = Array.from(files).map(f => f.name).join(', ');
+        fileInfo.innerHTML = `✓ ${files.length} file(s): ${names}`;
+        fileInfo.style.color = '#059669';
+        fileInfo.style.fontWeight = '600';
+      } else {
+        fileInfo.innerHTML = 'ℹ️ Supported formats: PDF, JPG, PNG, JPEG';
+        fileInfo.style.color = '#6b7280';
+      }
+    });
+  </script>
+</body>
+</html>

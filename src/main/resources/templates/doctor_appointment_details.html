@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title th:text="'Appointment Details - ' + ${appointment.id}">Appointment Details</title>
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" 
+          integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary-color: #4A90E2;
+            --success-color: #27AE60;
+            --warning-color: #F39C12;
+            --danger-color: #E74C3C;
+            --light-bg: #F8F9FA;
+            --card-shadow: 0 4px 6px rgba(0,0,0,0.07);
+            --card-shadow-hover: 0 8px 15px rgba(0,0,0,0.12);
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding-bottom: 2rem;
+        }
+
+        .page-header {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--card-shadow);
+            animation: slideDown 0.5s ease-out;
+        }
+
+        .page-header h1 {
+            color: #2C3E50;
+            font-weight: 700;
+            margin: 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .page-header h1 i {
+            background: linear-gradient(135deg, var(--primary-color), #667eea);
+            color: white;
+            padding: 0.8rem;
+            border-radius: 12px;
+            margin-right: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .appointment-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s ease;
+            animation: fadeInUp 0.6s ease-out;
+            border: none;
+        }
+
+        .appointment-card:hover {
+            box-shadow: var(--card-shadow-hover);
+            transform: translateY(-2px);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            color: white !important;
+            padding: 1.5rem;
+            border: none;
+        }
+
+        .card-header h5 {
+            margin: 0;
+            font-weight: 600;
+            font-size: 1.3rem;
+        }
+
+        .status-badge {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            font-size: 0.9rem;
+            padding: 0.6em 1.2em;
+            border-radius: 25px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            animation: pulse 2s infinite;
+        }
+
+        .badge-success {
+            background: linear-gradient(135deg, var(--success-color), #2ECC71) !important;
+        }
+
+        .badge-warning {
+            background: linear-gradient(135deg, var(--warning-color), #F1C40F) !important;
+        }
+
+        .badge-danger {
+            background: linear-gradient(135deg, var(--danger-color), #C0392B) !important;
+        }
+
+        .card-body {
+            padding: 2.5rem;
+            position: relative;
+        }
+
+        .info-section {
+            background: var(--light-bg);
+            border-radius: 12px;
+            padding: 1.8rem;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid var(--primary-color);
+            transition: all 0.3s ease;
+        }
+
+        .info-section:hover {
+            background: #E8F4F8;
+            border-left-color: #667eea;
+            transform: translateX(5px);
+        }
+
+        .info-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.2rem;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .info-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .info-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .icon-patient {
+            background: linear-gradient(135deg, #3498DB, #2980B9);
+            color: white;
+        }
+
+        .icon-time {
+            background: linear-gradient(135deg, #9B59B6, #8E44AD);
+            color: white;
+        }
+
+        .icon-notes {
+            background: linear-gradient(135deg, #E67E22, #D35400);
+            color: white;
+        }
+
+        .info-content {
+            flex: 1;
+        }
+
+        .info-label {
+            font-size: 0.85rem;
+            color: #7F8C8D;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.3rem;
+        }
+
+        .info-value {
+            font-size: 1.1rem;
+            color: #2C3E50;
+            font-weight: 500;
+        }
+
+        .info-value.highlight {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .card-footer {
+            background: var(--light-bg) !important;
+            padding: 1.5rem 2.5rem;
+            border-top: 2px solid #E0E0E0;
+        }
+
+        .btn {
+            padding: 0.7rem 1.5rem;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            border: none;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), #667eea);
+            box-shadow: 0 4px 10px rgba(74, 144, 226, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #357ABD, #5568d3);
+            box-shadow: 0 6px 15px rgba(74, 144, 226, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger-color), #C0392B);
+            box-shadow: 0 4px 10px rgba(231, 76, 60, 0.3);
+        }
+
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #C0392B, #A93226);
+            box-shadow: 0 6px 15px rgba(231, 76, 60, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #95A5A6, #7F8C8D);
+            color: white;
+            box-shadow: 0 4px 10px rgba(149, 165, 166, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #7F8C8D, #6C7A7B);
+            box-shadow: 0 6px 15px rgba(149, 165, 166, 0.4);
+            transform: translateY(-2px);
+            color: white;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .back-link {
+            margin-top: 2rem;
+            display: inline-block;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            }
+            50% {
+                box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .page-header {
+                padding: 1.5rem;
+            }
+
+            .card-body {
+                padding: 1.5rem;
+            }
+
+            .card-footer {
+                padding: 1.5rem;
+            }
+
+            .status-badge {
+                position: static;
+                display: inline-block;
+                margin-bottom: 1rem;
+            }
+
+            .info-row {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .info-icon {
+                margin-bottom: 0.5rem;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+
+        .tooltip-info {
+            cursor: help;
+            color: var(--primary-color);
+            margin-left: 0.5rem;
+        }
+
+        .quick-actions {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            box-shadow: var(--card-shadow);
+        }
+
+        .quick-actions h6 {
+            color: #2C3E50;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .quick-actions h6 i {
+            margin-right: 0.5rem;
+            color: var(--primary-color);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container mt-4 mb-5">
+        
+        <div class="page-header">
+            <h1>
+                <i class="fas fa-calendar-check"></i>
+                <span>Appointment Details</span>
+            </h1>
+        </div>
+
+        <div class="appointment-card">
+            <div class="card-header">
+                <h5>
+                    <i class="fas fa-file-medical-alt mr-2"></i>
+                    Appointment ID: <span th:text="${appointment.id}">123</span>
+                </h5>
+            </div>
+            
+            <div class="card-body">
+                
+                <span th:classappend="${appointment.status == 'CONFIRMED'} ? 'badge badge-success' : 
+                                         (${appointment.status == 'PENDING'} ? 'badge badge-warning' : 
+                                          'badge badge-danger')" 
+                      class="status-badge text-uppercase"
+                      th:text="${appointment.status}">CONFIRMED</span>
+
+                <div class="info-section">
+                    
+                    <div class="info-row">
+                        <div class="info-icon icon-patient">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="info-content">
+                            <div class="info-label">Patient Name</div>
+                            <div class="info-value" th:text="${appointment.patient != null ? appointment.patient.name : 'Not Assigned'}">
+                                John Doe
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="info-row">
+                        <div class="info-icon icon-time">
+                            <i class="far fa-clock"></i>
+                        </div>
+                        <div class="info-content">
+                            <div class="info-label">Appointment Date & Time</div>
+                            <div class="info-value highlight" th:text="${#temporals.format(appointment.appointmentTime, 'EEEE, dd MMMM yyyy • HH:mm')}">
+                                Monday, 01 January 2025 • 10:00
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="info-row">
+                        <div class="info-icon icon-notes">
+                            <i class="fas fa-notes-medical"></i>
+                        </div>
+                        <div class="info-content">
+                            <div class="info-label">Appointment Notes</div>
+                            <div class="info-value" th:text="${appointment.notes != null && !appointment.notes.isEmpty() ? appointment.notes : 'No notes provided'}">
+                                Regular checkup and follow-up consultation for ongoing treatment.
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="card-footer">
+                <div class="action-buttons">
+                    
+                    <a class="btn btn-primary"
+                       th:href="@{'/doctor/appointments/' + ${appointment.id} + '/edit'}">
+                        <i class="fas fa-edit mr-2"></i> Edit Appointment
+                    </a>
+
+                    <form th:action="@{'/appointments/' + ${appointment.id} + '/cancel'}"
+                          method="post"
+                          style="display:inline;">
+                        <button type="submit"
+                                class="btn btn-danger"
+                                onclick="return confirm('Are you sure you want to cancel this appointment? This action cannot be undone.');">
+                            <i class="fas fa-times-circle mr-2"></i> Cancel Appointment
+                        </button>
+                    </form>
+
+                </div>
+            </div>
+
+        </div>
+
+        <div class="quick-actions">
+            <h6>
+                <i class="fas fa-bolt"></i>
+                Quick Actions
+            </h6>
+            <div class="action-buttons">
+                <a href="#" class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-print mr-1"></i> Print Details
+                </a>
+                <a href="#" class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-envelope mr-1"></i> Send Reminder
+                </a>
+                <a href="#" class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-history mr-1"></i> View History
+                </a>
+            </div>
+        </div>
+        
+        <div class="back-link">
+            <a th:href="@{/appointments/doctor}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left mr-2"></i> Back to Appointments
+            </a>
+        </div>
+        
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+
+</body>
+</html>

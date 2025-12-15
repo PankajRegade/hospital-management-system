@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Appointment</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px 0;
+        }
+        .edit-card {
+            max-width: 700px;
+            margin: 0 auto;
+            border-radius: 15px;
+            border: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+            padding: 20px;
+        }
+        .form-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 8px;
+        }
+        .form-control, .form-select {
+            border-radius: 8px;
+            border: 2px solid #e0e0e0;
+            padding: 10px 15px;
+            transition: all 0.3s ease;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 12px;
+            font-weight: 600;
+            border-radius: 8px;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        .btn-secondary {
+            border-radius: 8px;
+            padding: 12px;
+            font-weight: 600;
+        }
+        .info-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .info-item:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="card edit-card">
+        <div class="card-header">
+            <h3 class="mb-0">
+                <i class="fas fa-edit me-2"></i>Edit Appointment
+            </h3>
+        </div>
+
+        <div class="card-body p-4">
+            <!-- Patient Information -->
+            <div class="info-section">
+                <h5 class="mb-3">
+                    <i class="fas fa-user-injured me-2 text-primary"></i>Patient Information
+                </h5>
+                <div class="info-item">
+                    <span><strong>Patient Name:</strong></span>
+                    <span th:text="${appointment.patient != null ? appointment.patient.name : '--'}">John Doe</span>
+                </div>
+                <div class="info-item">
+                    <span><strong>Patient Email:</strong></span>
+                    <span th:text="${appointment.patient != null ? appointment.patient.email : '--'}">patient@email.com</span>
+                </div>
+            </div>
+
+            <!-- Edit Form -->
+            <form th:action="@{/doctor/appointments/{id}/update(id=${appointment.id})}" method="post">
+
+                <div class="mb-3">
+                    <label for="appointmentTime" class="form-label">
+                        <i class="fas fa-calendar-alt me-1 text-primary"></i>Appointment Date &amp; Time
+                    </label>
+                    <input type="datetime-local"
+                           id="appointmentTime"
+                           name="appointmentTime"
+                           class="form-control"
+                           required
+                           th:value="${appointment.appointmentTime != null} ? ${#temporals.format(appointment.appointmentTime, 'yyyy-MM-dd''T''HH:mm')} : ''">
+                </div>
+
+                <div class="mb-3">
+                    <label for="status" class="form-label">
+                        <i class="fas fa-info-circle me-1 text-primary"></i>Status
+                    </label>
+                    <select id="status" name="status" class="form-select" required>
+                        <option value="BOOKED" th:selected="${appointment.status.name() == 'BOOKED'}">BOOKED</option>
+                        <option value="CONFIRMED" th:selected="${appointment.status.name() == 'CONFIRMED'}">CONFIRMED</option>
+                        <option value="COMPLETED" th:selected="${appointment.status.name() == 'COMPLETED'}">COMPLETED</option>
+                        <option value="CANCELLED" th:selected="${appointment.status.name() == 'CANCELLED'}">CANCELLED</option>
+                    </select>
+                </div>
+
+                <div class="mb-4">
+                    <label for="notes" class="form-label">
+                        <i class="fas fa-notes-medical me-1 text-primary"></i>Notes
+                    </label>
+                    <textarea id="notes"
+                              name="notes"
+                              class="form-control"
+                              rows="4"
+                              th:text="${appointment.notes}"
+                              placeholder="Enter appointment notes..."></textarea>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-save me-2"></i>Save Changes
+                        </button>
+                    </div>
+                    <div class="col-md-6">
+                        <!-- Go back to doctor dashboard (valid mapping) -->
+                        <a th:href="@{/doctor/dashboard}" class="btn btn-secondary w-100">
+                            <i class="fas fa-times me-2"></i>Cancel
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

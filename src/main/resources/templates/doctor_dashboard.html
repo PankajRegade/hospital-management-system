@@ -1,0 +1,362 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Doctor Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* --- Base reset --- */
+    *{margin:0;padding:0;box-sizing:border-box}
+    html,body{height:100%}
+
+    /* --- Color system (no purple) --- */
+    :root{
+      --bg-1: #f3fbfb;       /* soft off-white */
+      --accent-1: #0ea5a4;   /* teal */
+      --accent-2: #60a5fa;   /* sky */
+      --muted: #6b7280;
+      --card-bg: rgba(255,255,255,0.96);
+      --glass: rgba(255,255,255,0.7);
+      --radius: 16px;
+      --shadow-1: 0 10px 30px rgba(2,6,23,0.08);
+      --shadow-2: 0 6px 18px rgba(14,165,164,0.08);
+    }
+
+    body{
+      font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(140deg, var(--bg-1) 0%, #eef9fb 100%);
+      min-height:100vh;padding:24px;position:relative;overflow-x:hidden;color:#0f1724;
+    }
+
+    /* Decorative soft gradients (no purple) */
+    body::before{
+      content:'';position:fixed;right:-12%;top:-8%;width:480px;height:480px;background:radial-gradient(circle at 30% 30%, rgba(14,165,164,0.12), transparent 40%);pointer-events:none;z-index:0;
+    }
+    body::after{
+      content:'';position:fixed;left:-10%;bottom:-6%;width:380px;height:380px;background:radial-gradient(circle at 70% 70%, rgba(96,165,250,0.10), transparent 40%);pointer-events:none;z-index:0;
+    }
+
+    .container{max-width:1200px;margin:0 auto;position:relative;z-index:1}
+
+    .header{background:var(--card-bg);backdrop-filter:blur(8px);padding:22px;border-radius:18px;margin-bottom:22px;box-shadow:var(--shadow-1);display:flex;justify-content:space-between;align-items:center;border:1px solid rgba(15,23,36,0.04);transition:transform .22s ease}
+    .header:hover{transform:translateY(-4px)}
+
+    .header-left{display:flex;align-items:center;gap:16px}
+
+    .doctor-avatar{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--accent-1),var(--accent-2));display:flex;align-items:center;justify-content:center;color:white;font-size:22px;font-weight:700;box-shadow:var(--shadow-2);overflow:hidden}
+    .doctor-avatar img{width:100%;height:100%;object-fit:cover}
+
+    .header-info h1{color:#022633;font-size:26px;font-weight:700;margin-bottom:4px}
+    .header-subtitle{color:var(--muted);font-size:14px;display:flex;align-items:center;gap:10px}
+
+    .status-dot{width:9px;height:9px;border-radius:50%;background:var(--accent-1);box-shadow:0 0 8px rgba(14,165,164,0.25)}
+
+    .logout-btn{padding:10px 20px;background:linear-gradient(90deg,#ef4444,#dc2626);color:white;text-decoration:none;border-radius:12px;font-weight:700;display:flex;align-items:center;gap:10px;border:none;box-shadow:0 8px 26px rgba(220,38,38,0.12);transition:transform .18s ease}
+    .logout-btn:hover{transform:translateY(-3px)}
+
+    .grid{display:grid;grid-template-columns:2fr 1fr;gap:20px;margin-bottom:22px}
+    @media (max-width:1024px){.grid{grid-template-columns:1fr}}
+
+    .card{background:var(--card-bg);backdrop-filter:blur(6px);padding:20px;border-radius:14px;box-shadow:var(--shadow-1);transition:transform .18s ease,box-shadow .18s ease;border:1px solid rgba(15,23,36,0.04)}
+    .card:hover{transform:translateY(-6px);box-shadow:0 18px 40px rgba(2,6,23,0.10)}
+
+    .card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid #f1f5f9}
+    .card h3{color:#052a2a;font-size:18px;font-weight:800;display:flex;align-items:center;gap:12px}
+    .card h3 i{width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:10px;background:linear-gradient(135deg,var(--accent-1),var(--accent-2));color:white;font-size:14px}
+
+    .view-all-link{color:var(--accent-1);text-decoration:none;font-size:13px;font-weight:700}
+    .view-all-link:hover{text-decoration:underline}
+
+    .empty-state{text-align:center;padding:36px 18px;color:var(--muted)}
+    .empty-state i{font-size:44px;color:#e6eef0;margin-bottom:10px}
+
+    table{width:100%;border-collapse:separate;border-spacing:0}
+    thead{background:linear-gradient(90deg,var(--accent-1),var(--accent-2))}
+    th{padding:12px 14px;text-align:left;color:white;font-weight:700;font-size:13px;text-transform:uppercase}
+    th:first-child{border-radius:8px 0 0 8px}
+    th:last-child{border-radius:0 8px 0 0}
+
+    td{padding:12px 14px;border-bottom:1px solid #f3f4f6;color:#052a2a;font-size:14px;vertical-align:middle}
+    tbody tr:hover{background:rgba(96,165,250,0.03)}
+
+    .btn{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:10px;background:linear-gradient(90deg,var(--accent-1),var(--accent-2));color:white;text-decoration:none;font-weight:700;border:none;cursor:pointer;transition:transform .12s ease}
+    .btn:hover{transform:translateY(-3px)}
+
+    .btn-secondary{background:linear-gradient(90deg,#34d399,#059669)}
+    .btn-text{background:transparent;color:var(--accent-1);padding:6px 8px;border-radius:8px}
+    .btn-text:hover{text-decoration:underline}
+
+    .actions{display:flex;gap:8px;align-items:center}
+    .patient-info{display:flex;align-items:center;gap:10px}
+    .patient-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(90deg,var(--accent-1),var(--accent-2));display:flex;align-items:center;justify-content:center;color:white;font-weight:700}
+
+    .time-badge{display:inline-flex;align-items:center;gap:6px;font-weight:600;color:#052a2a}
+    .time-badge i{color:var(--accent-2)}
+
+    .badge{display:inline-flex;align-items:center;gap:6px;padding:6px 8px;background:rgba(14,165,164,0.06);color:var(--accent-1);border-radius:999px;font-weight:800}
+
+    .profile-list{list-style:none;padding:0;margin:0}
+    .profile-item{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;font-size:14px;color:#052a2a}
+    .profile-item-icon{width:34px;height:34px;border-radius:10px;background:#ecfeff;display:flex;align-items:center;justify-content:center;color:var(--accent-1);font-size:13px}
+    .profile-item-label{font-weight:700;color:var(--muted);font-size:12px;text-transform:uppercase}
+    .profile-item-value{font-weight:700;color:#022633}
+
+    .quick-actions{display:flex;flex-direction:column;gap:12px}
+    .action-card{padding:14px;border-radius:12px;background:linear-gradient(180deg, rgba(96,165,250,0.04), rgba(14,165,164,0.02));border:1px solid rgba(148,163,184,0.14);text-decoration:none;color:inherit;transition:transform .18s ease}
+    .action-card:hover{transform:translateY(-6px);box-shadow:var(--shadow-2)}
+
+    .profile-photo{width:84px;height:84px;border-radius:50%;overflow:hidden;box-shadow:0 8px 24px rgba(2,6,23,0.08);border:3px solid #e6f8f7;background:#fff;display:flex;align-items:center;justify-content:center}
+    .profile-photo img{width:100%;height:100%;object-fit:cover}
+    .profile-photo i{font-size:34px;color:#9ca3af}
+
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+
+    @media (max-width:768px){body{padding:16px}.header{flex-direction:column;gap:12px;text-align:center}.header-left{flex-direction:column}.card{padding:16px}.actions{justify-content:center}}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="header-left">
+        <div class="doctor-avatar">
+          <img th:if="${doctor != null && doctor.photoPath != null}" th:src="@{${doctor.photoPath}}" alt="Doctor Photo"/>
+          <i th:if="${doctor == null || doctor.photoPath == null}" class="fas fa-user-md"></i>
+        </div>
+        <div class="header-info">
+          <h1 th:text="'Welcome, Dr. ' + ${doctorName}">Welcome, Doctor</h1>
+          <div class="header-subtitle">
+            <span class="status-dot"></span>
+            <span id="current-time"></span>
+          </div>
+        </div>
+      </div>
+      <a th:href="@{/logoutPage}" class="logout-btn">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>Logout</span>
+      </a>
+    </div>
+
+    <!-- Main grid: Appointments + Profile -->
+    <div class="grid">
+      <!-- LEFT: Upcoming appointments -->
+      <div class="card">
+        <div class="card-header">
+          <h3>
+            <i class="fas fa-calendar-alt"></i>
+            <span>Upcoming Appointments</span>
+          </h3>
+          <a th:href="@{/appointments/doctor}" class="view-all-link">
+            View All
+            <i class="fas fa-arrow-right"></i>
+          </a>
+        </div>
+
+        <div th:if="${appointments == null or #lists.isEmpty(appointments)}" class="empty-state">
+          <i class="far fa-calendar-times"></i>
+          <p>No appointments scheduled</p>
+          <p style="font-size: 13px; margin-top: 4px; color: var(--muted);">
+            Your calendar is clear for now.
+          </p>
+        </div>
+
+        <table th:if="${appointments != null and !#lists.isEmpty(appointments)}">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Patient</th>
+              <th>Scheduled Time</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="a : ${appointments}">
+              <td>
+                <span class="badge">
+                  <i class="fas fa-hashtag"></i>
+                  <span th:text="${a.id}">1</span>
+                </span>
+              </td>
+              <td>
+                <div class="patient-info">
+                  <div class="patient-avatar"
+                       th:text="${a.patient != null ? #strings.substring(a.patient.name, 0, 1) : '?'}">
+                    J
+                  </div>
+                  <span th:text="${a.patient != null ? a.patient.name : '--'}">Patient Name</span>
+                </div>
+              </td>
+              <td>
+                <span class="time-badge">
+                  <i class="far fa-clock"></i>
+                  <span th:text="${a.appointmentTime}">2025-12-04 10:00</span>
+                </span>
+              </td>
+              <td class="actions">
+                <a th:href="@{'/doctor/records/new'(appointmentId=${a.id}, patientId=${a.patient != null ? a.patient.id : ''})}"
+                   class="btn btn-secondary">
+                  <i class="fas fa-plus"></i>
+                  Add Record
+                </a>
+                <a th:href="@{'/doctor/appointments/' + ${a.id}}" class="btn btn-text">
+                  <i class="fas fa-eye"></i>
+                  View
+                </a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- RIGHT: Doctor profile + quick actions -->
+      <div class="card">
+        <!-- Doctor Profile -->
+        <div class="card-header">
+          <h3>
+            <i class="fas fa-id-badge"></i>
+            <span>My Profile</span>
+          </h3>
+          <a th:href="@{/doctor/details}" class="view-all-link">
+            Edit Profile
+            <i class="fas fa-pen"></i>
+          </a>
+        </div>
+
+        <!-- Profile Photo in profile card -->
+        <div class="profile-photo-wrapper" style="display:flex;justify-content:center;margin-bottom:14px">
+          <div class="profile-photo">
+            <img th:if="${doctor != null && doctor.photoPath != null}"
+                 th:src="@{${doctor.photoPath}}"
+                 alt="Doctor Photo"/>
+            <i th:if="${doctor == null || doctor.photoPath == null}"
+               class="fas fa-user-md"></i>
+          </div>
+        </div>
+
+        <ul class="profile-list" style="margin-bottom:20px">
+          <li class="profile-item">
+            <div class="profile-item-icon">
+              <i class="fas fa-user"></i>
+            </div>
+            <div>
+              <div class="profile-item-label">Name</div>
+              <div class="profile-item-value"
+                   th:text="${doctor != null && doctor.name != null ? 'Dr. ' + doctor.name : 'Dr. ' + doctorName}">
+                Dr. Demo Name
+              </div>
+            </div>
+          </li>
+
+          <li class="profile-item">
+            <div class="profile-item-icon">
+              <i class="fas fa-envelope"></i>
+            </div>
+            <div>
+              <div class="profile-item-label">Email</div>
+              <div class="profile-item-value"
+                   th:text="${doctor != null && doctor.email != null ? doctor.email : '--'}">
+                doctor@example.com
+              </div>
+            </div>
+          </li>
+
+          <li class="profile-item">
+            <div class="profile-item-icon">
+              <i class="fas fa-stethoscope"></i>
+            </div>
+            <div>
+              <div class="profile-item-label">Specialization</div>
+              <div class="profile-item-value"
+                   th:text="${doctor != null && doctor.specialization != null ? doctor.specialization : 'Not set'}">
+                General Physician
+              </div>
+            </div>
+          </li>
+
+          <li class="profile-item">
+            <div class="profile-item-icon">
+              <i class="fas fa-phone"></i>
+            </div>
+            <div>
+              <div class="profile-item-label">Phone</div>
+              <div class="profile-item-value"
+                   th:text="${doctor != null && doctor.phone != null && !#strings.isEmpty(doctor.phone) ? doctor.phone : 'Not added'}">
+                +91 98765 43210
+              </div>
+            </div>
+          </li>
+
+          <li class="profile-item">
+            <div class="profile-item-icon">
+              <i class="fas fa-shield-heart"></i>
+            </div>
+            <div>
+              <div class="profile-item-label">Status</div>
+              <div>
+                <span th:if="${doctor != null && doctor.approved}"
+                      class="status-pill approved"
+                      style="display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;background:#ecfdf5;color:#059669;font-weight:700">
+                  <i class="fas fa-check-circle"></i>
+                  Approved
+                </span>
+                <span th:if="${doctor == null || !doctor.approved}"
+                      class="status-pill pending"
+                      style="display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;background:#fff7ed;color:#b45309;font-weight:700">
+                  <i class="fas fa-hourglass-half"></i>
+                  Pending Approval
+                </span>
+              </div>
+            </div>
+          </li>
+        </ul>
+
+        <!-- Quick Actions -->
+        <div class="card-header" style="margin-top:4px;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #f1f5f9">
+          <h3>
+            <i class="fas fa-bolt"></i>
+            <span>Quick Actions</span>
+          </h3>
+        </div>
+
+        <div class="quick-actions">
+          <a th:href="@{/doctor/records}" class="action-card">
+            <h4 style="margin:0 0 6px 0">View All Records</h4>
+            <p style="margin:0;color:var(--muted);font-size:13px">Access complete patient medical history and records database.</p>
+          </a>
+
+          <a th:href="@{/doctor/records/new}" class="action-card">
+            <h4 style="margin:0 0 6px 0">Create New Record</h4>
+            <p style="margin:0;color:var(--muted);font-size:13px">Add a new medical record or update patient information.</p>
+          </a>
+
+          <a th:href="@{/appointments/doctor}" class="action-card">
+            <h4 style="margin:0 0 6px 0">Manage Appointments</h4>
+            <p style="margin:0;color:var(--muted);font-size:13px">View and manage all patient appointments.</p>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function updateTime() {
+      const now = new Date();
+      const options = {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+        timeZone: 'Asia/Kolkata'
+      };
+      document.getElementById('current-time').textContent = now.toLocaleDateString('en-IN', options);
+    }
+
+    updateTime();
+    setInterval(updateTime, 60000);
+  </script>
+</body>
+</html>

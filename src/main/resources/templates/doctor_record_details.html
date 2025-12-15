@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor | Medical Records</title>
+
+    <!-- BOOTSTRAP + ICONS + GOOGLE FONTS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link href="fonts.googleapis.com" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-color: #007bff;
+            --secondary-color: #6c757d;
+            --background-color: #f8f9fc;
+            --card-bg: #ffffff;
+            --text-color: #333;
+            --shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+            --badge-pres-bg: #28a745; /* Green for prescriptions */
+            --badge-dia-bg: #ffc107; /* Yellow for diagnosis */
+        }
+        body {
+            background: var(--background-color);
+            font-family: "Inter", sans-serif;
+            color: var(--text-color);
+            transition: background-color 0.3s;
+        }
+        .card {
+            border-radius: 20px;
+            border: none;
+            box-shadow: var(--shadow);
+            background: var(--card-bg);
+            transition: transform 0.3s ease-in-out;
+        }
+        .header-bg {
+            background: linear-gradient(105deg, #0056b3, var(--primary-color));
+            color: white;
+            padding: 50px 20px 80px;
+            border-radius: 0 0 30px 30px;
+            position: relative;
+        }
+        .search-box {
+            position: relative;
+            margin-top: -45px; /* Pull search bar up into the header area */
+        }
+        .search-box input {
+            border-radius: 15px;
+            padding: 12px 20px 12px 45px; /* Add left padding for icon */
+            border: none;
+            box-shadow: var(--shadow);
+            transition: box-shadow 0.3s, border-color 0.3s;
+        }
+        .search-box input:focus {
+            box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25);
+            outline: none;
+        }
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--secondary-color);
+        }
+        .record-btn {
+            border-radius: 15px;
+            padding: 12px 25px;
+            font-weight: 600;
+            box-shadow: var(--shadow);
+            transition: transform 0.2s;
+        }
+        .record-btn:hover {
+            transform: translateY(-2px);
+        }
+        .table thead th {
+            background: #e9f2ff;
+            color: #555;
+            font-weight: 600;
+            border-bottom: none;
+            padding: 15px;
+        }
+        .table-hover tbody tr:hover {
+            background: #eef5ff;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .badge {
+            padding: 8px 12px;
+            border-radius: 12px;
+            font-weight: 500;
+            display: inline-block;
+        }
+        .badge-pres { background: var(--badge-pres-bg); color: white; }
+        .badge-dia { background: var(--badge-dia-bg); color: #333; }
+        .btn-sm {
+            border-radius: 10px;
+            margin-right: 5px;
+        }
+        .btn-outline-primary {
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .action-cell {
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+        .table-hover tbody tr:hover .action-cell {
+            opacity: 1;
+        }
+
+    </style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<div class="header-bg text-center">
+    <h2 class="fw-bold mb-2"><i class="bi bi-file-medical"></i> Medical Records</h2>
+    <p class="lead">View, track, and manage all patient medical reports efficiently.</p>
+</div>
+
+<div class="container pb-5" style="margin-top: -60px;">
+
+    <!-- Search + Add Record Button -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <div class="search-box flex-grow-1 me-3">
+            <i class="bi bi-search search-icon"></i>
+            <input id="searchInput" type="text" class="form-control"
+                   placeholder="Search by patient name, diagnosis..."
+                   onkeyup="filterRecords()">
+        </div>
+        <a href="/doctor/records/new" class="btn btn-primary record-btn">
+            <i class="bi bi-plus-lg"></i> Add New Record
+        </a>
+    </div>
+
+    <!-- Records Card -->
+    <div class="card p-4">
+        <h5 class="mb-4 fw-semibold text-secondary">All Records</h5>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle" id="recordsTable">
+                <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Patient</th>
+                    <th>Diagnosis</th>
+                    <th>Prescription</th>
+                    <th>Date</th>
+                    <th>Files</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <!-- Thymeleaf Loop -->
+                <tr th:each="r, i : ${records}">
+                    <td th:text="${i.index + 1}">1</td>
+                    <td th:text="${r.patient.name}">John Doe</td>
+
+                    <td>
+                        <span class="badge badge-dia" th:text="${r.diagnosis}">Fever</span>
+                    </td>
+
+                    <td>
+                        <span class="badge badge-pres" th:text="${r.prescription}">Antibiotics</span>
+                    </td>
+
+                    <td th:text="${r.recordDate}">2025-10-26</td>
+
+                    <!-- Files -->
+                    <td>
+                        <div th:each="f : ${r.reports}">
+                            <a th:href="@{/records/files/{id}(id=${f.id})}"
+                               class="text-primary small d-block text-decoration-none">
+                                <i class="bi bi-file-earmark-arrow-down-fill"></i>
+                                <span th:text="${f.originalName}">report.pdf</span>
+                            </a>
+                        </div>
+                    </td>
+
+                    <!-- Actions -->
+                   <td class="text-nowrap action-cell">
+                        <a th:href="@{'/doctor/appointments/' + ${r.id}}"
+                           class="btn btn-outline-primary btn-sm"
+                           title="View Details">
+                            <i class="bi bi-eye"></i> Details
+                        </a>
+
+                        <!-- View Appointment (only if appointment exists) -->
+                        <a th:if="${r.appointment != null}"
+                           th:href="@{/doctor/appointments/{id}(id=${r.appointment.id})}"
+                           class="btn btn-secondary btn-sm"
+                           title="View Appointment">
+                            <i class="bi bi-calendar-check"></i>
+                        </a>
+                    </td>
+                </tr>
+                <!-- Dummy Row for Visualisation -->
+                 <tr>
+                    <td>2</td>
+                    <td>Jane Smith</td>
+                    <td><span class="badge badge-dia">Hypertension</span></td>
+                    <td><span class="badge badge-pres">Diuretics</span></td>
+                    <td>2025-10-25</td>
+                    <td>
+                        <a href="#" class="text-primary small d-block text-decoration-none"><i class="bi bi-file-earmark-arrow-down-fill"></i> labs.csv</a>
+                    </td>
+                     <td class="text-nowrap action-cell">
+                        <a href="#" class="btn btn-outline-primary btn-sm" title="View Details">
+                            <i class="bi bi-eye"></i> Details
+                        </a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="cdn.jsdelivr.net"></script>
+<script>
+    // 🔎 Search Filter JS with smooth transition
+    function filterRecords() {
+        let input = document.getElementById("searchInput").value.toLowerCase();
+        let rows = document.querySelectorAll("#recordsTable tbody tr");
+
+        rows.forEach(row => {
+            if (row.innerText.toLowerCase().includes(input)) {
+                row.style.display = "";
+                row.style.transition = "opacity 0.5s ease-in";
+                row.style.opacity = "1";
+            } else {
+                row.style.display = "none";
+                row.style.opacity = "0";
+            }
+        });
+    }
+</script>
+
+</body>
+</html>

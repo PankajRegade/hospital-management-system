@@ -1,0 +1,62 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title th:text="'Medical Records · ' + (${patientName} ?: 'Patient')">Medical Records</title>
+  <style>
+    body{font-family:Arial,Helvetica,sans-serif;background:#f4f6fb;padding:20px}
+    .container{max-width:980px;margin:0 auto}
+    .card{background:#fff;border-radius:10px;padding:18px;box-shadow:0 6px 18px rgba(0,0,0,0.06);margin-bottom:14px}
+    h1{color:#1f2937;margin-bottom:12px}
+    .row{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+    .meta{color:#6b7280;font-size:13px}
+    .summary{margin-top:8px;color:#374151}
+    .btn{display:inline-block;padding:8px 12px;background:#667eea;color:#fff;border-radius:8px;text-decoration:none}
+    .empty{text-align:center;color:#6b7280;padding:30px}
+    .attachments{margin-top:8px;font-size:13px;color:#374151}
+    .small{font-size:13px;color:#6b7280}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 th:text="'Medical Records for ' + (${patientName} ?: 'Patient')">Medical Records</h1>
+
+    <div th:if="${records == null or #lists.isEmpty(records)}" class="card empty">
+      No medical records found.
+    </div>
+
+    <div th:if="${records != null and !#lists.isEmpty(records)}">
+      <div th:each="rec : ${records}" class="card">
+        <div class="row">
+          <div>
+            <div style="font-weight:700">Record #<span th:text="${rec.id}">1</span></div>
+            <div class="small">
+              Date: 
+              <span th:text="${rec.recordDate != null ? #temporals.format(rec.recordDate,'dd-MMM-yyyy') : '-'}">—</span>
+              &nbsp;|&nbsp;
+              Doctor: <span th:text="${rec.doctor != null ? rec.doctor.name : '-'}">Dr X</span>
+              <span th:if="${rec.appointment != null}"> &nbsp;|&nbsp; Appt# <span th:text="${rec.appointment.id}">0</span></span>
+            </div>
+
+            <div class="summary" th:text="${rec.diagnosis != null ? (rec.diagnosis.length() > 120 ? rec.diagnosis.substring(0,120) + '...' : rec.diagnosis) : 'No diagnosis recorded.'}">Diagnosis summary</div>
+
+            <div class="attachments" th:if="${rec.reports != null and !#lists.isEmpty(rec.reports)}">
+              Attachments:
+              <span th:each="r,iterStat : ${rec.reports}">
+                <a th:href="@{|/records/files/${r.id}|}" th:text="${r.originalName != null ? r.originalName : r.fileName}">file.pdf</a>
+                <span th:if="${!iterStat.last}">,&nbsp;</span>
+              </span>
+            </div>
+
+            <div class="small" th:if="${rec.reports == null or #lists.isEmpty(rec.reports)}">No attachments</div>
+          </div>
+
+          <div style="text-align:right">
+            <a class="btn" th:href="@{|/patient/records/${rec.id}|}">View details</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

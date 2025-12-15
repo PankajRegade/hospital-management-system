@@ -1,0 +1,54 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Appointment Confirmed</title>
+  <style>
+    body{font-family:Arial,Helvetica,sans-serif;background:#f4f6f9;padding:30px}
+    .card{max-width:720px;margin:0 auto;background:#fff;padding:28px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,0.08)}
+    h1{margin:0 0 12px 0;color:#111;font-size:22px}
+    p.lead{color:#475569;margin-bottom:18px}
+    table{width:100%;border-collapse:collapse;margin-top:10px}
+    td{padding:10px;border:1px solid #eef2f6}
+    .muted{color:#7b8794;font-size:13px}
+    .actions{margin-top:18px}
+    .btn{display:inline-block;padding:10px 14px;border-radius:8px;text-decoration:none;color:white;background:#2563eb}
+    .btn-outline{background:#fff;color:#2563eb;border:1px solid #cfe0ff}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Appointment Confirmed</h1>
+    <p class="lead">Thanks <span th:text="${patientName}">Patient</span> — your appointment has been booked.</p>
+
+    <table>
+      <tr>
+        <td class="muted"><strong>Appointment No</strong></td>
+        <td th:text="${appointment.appointmentNumber}">APT-...</td>
+      </tr>
+      <tr>
+        <td class="muted"><strong>Doctor</strong></td>
+        <td th:text="${appointment.doctor != null ? appointment.doctor.name : '-'}">Dr. Name</td>
+      </tr>
+      <tr>
+        <td class="muted"><strong>When</strong></td>
+        <td th:text="${appointment.appointmentTime != null ? #temporals.format(appointment.appointmentTime,'dd MMM yyyy HH:mm') : '-'}">02 Dec 2025 15:30</td>
+      </tr>
+      <tr>
+        <td class="muted"><strong>Notes</strong></td>
+        <td th:text="${appointment.notes}">Notes</td>
+      </tr>
+      <tr>
+        <td class="muted"><strong>Status</strong></td>
+        <td th:text="${appointment.status}">BOOKED</td>
+      </tr>
+    </table>
+
+    <div class="actions">
+      <a th:href=@{/patient/appointments} class="btn-outline">View all appointments</a>
+      <a th:href="@{/patient}" class="btn" style="margin-left:12px">Back to Dashboard</a>
+    </div>
+  </div>
+</body>
+</html>

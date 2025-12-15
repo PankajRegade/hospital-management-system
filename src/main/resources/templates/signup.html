@@ -1,0 +1,421 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hospital Management System - Sign Up</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%;font-family:'Poppins',sans-serif;color:#1e293b;overflow-x:hidden}
+    body{background:#0a0e27;display:flex;align-items:center;justify-content:center;padding:20px;position:relative}
+    
+    /* Animated background */
+    body::before{content:'';position:fixed;top:0;left:0;width:100%;height:100%;
+      background:radial-gradient(circle at 20% 30%, rgba(139,92,246,0.2), transparent 40%),
+                 radial-gradient(circle at 80% 70%, rgba(59,130,246,0.2), transparent 40%),
+                 radial-gradient(circle at 50% 50%, rgba(16,185,129,0.1), transparent 50%);
+      animation:drift 25s ease-in-out infinite;z-index:0}
+    @keyframes drift{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(40px,-40px) scale(1.05)}
+                     66%{transform:translate(-30px,30px) scale(0.95)}}
+    
+    body::after{content:'';position:fixed;top:0;left:0;width:100%;height:100%;
+      background-image:repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(255,255,255,0.02) 40px, rgba(255,255,255,0.02) 42px),
+                      repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(255,255,255,0.02) 40px, rgba(255,255,255,0.02) 42px);
+      pointer-events:none;z-index:0}
+    
+    .orb{position:fixed;border-radius:50%;filter:blur(80px);opacity:0.4;pointer-events:none;z-index:0}
+    .orb-1{width:400px;height:400px;background:linear-gradient(135deg,#667eea,#764ba2);
+      top:-100px;left:-100px;animation:float1 20s ease-in-out infinite}
+    .orb-2{width:350px;height:350px;background:linear-gradient(135deg,#f093fb,#f5576c);
+      bottom:-80px;right:-80px;animation:float2 25s ease-in-out infinite}
+    .orb-3{width:300px;height:300px;background:linear-gradient(135deg,#4facfe,#00f2fe);
+      top:50%;left:50%;transform:translate(-50%,-50%);animation:float3 30s ease-in-out infinite}
+    
+    @keyframes float1{0%,100%{transform:translate(0,0)}50%{transform:translate(80px,80px)}}
+    @keyframes float2{0%,100%{transform:translate(0,0)}50%{transform:translate(-60px,-60px)}}
+    @keyframes float3{0%,100%{transform:translate(-50%,-50%)}50%{transform:translate(calc(-50% + 40px),calc(-50% + 40px))}}
+
+    .container{max-width:520px;width:100%;background:rgba(255,255,255,0.98);backdrop-filter:blur(30px);
+      border-radius:32px;box-shadow:0 40px 100px rgba(0,0,0,0.5);z-index:10;
+      border:1px solid rgba(255,255,255,0.2);
+      animation:slideUp 0.8s cubic-bezier(0.175,0.885,0.32,1.275)}
+    @keyframes slideUp{from{opacity:0;transform:translateY(60px) scale(0.95)}
+                      to{opacity:1;transform:translateY(0) scale(1)}}
+
+    .header{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);padding:48px 40px;
+      text-align:center;position:relative;overflow:hidden;border-radius:32px 32px 0 0}
+    
+    .header::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;
+      background:url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><path d="M50 10 L50 90 M10 50 L90 50" stroke="rgba(255,255,255,0.1)" stroke-width="2"/></svg>');
+      opacity:0.3}
+    
+    .logo{width:90px;height:90px;background:rgba(255,255,255,0.25);border-radius:24px;
+          display:flex;align-items:center;justify-content:center;margin:auto;margin-bottom:24px;
+          box-shadow:0 10px 30px rgba(0,0,0,0.2);position:relative;z-index:2;
+          animation:bounce 2s ease-in-out infinite}
+    @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+    
+    .logo i{font-size:44px;color:#fff}
+    .header h1{color:#fff;font-size:34px;font-weight:800;position:relative;z-index:2;letter-spacing:-1px}
+    .header p{color:rgba(255,255,255,0.9);margin-top:8px;font-size:16px;position:relative;z-index:2}
+
+    .form-content{padding:48px 40px}
+    .form-group{margin-bottom:28px;animation:fadeInUp 0.6s ease-out backwards}
+    .form-group:nth-child(1){animation-delay:0.1s}
+    .form-group:nth-child(2){animation-delay:0.2s}
+    .form-group:nth-child(3){animation-delay:0.3s}
+    .form-group:nth-child(4){animation-delay:0.4s}
+    
+    @keyframes fadeInUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+    
+    .form-group label{font-weight:600;color:#1e293b;margin-bottom:12px;display:flex;
+      align-items:center;gap:8px;font-size:15px}
+    .form-group label i{color:#667eea;font-size:16px}
+
+    .input-wrapper{position:relative}
+    .input-icon{position:absolute;left:18px;top:50%;transform:translateY(-50%);
+      color:#94a3b8;font-size:18px;pointer-events:none}
+    
+    .form-input{width:100%;padding:16px 18px 16px 52px;border-radius:14px;
+      border:2px solid #e2e8f0;outline:none;font-size:16px;transition:all 0.3s ease;
+      font-family:'Poppins',sans-serif;background:#fff}
+    .form-input:focus{border-color:#667eea;box-shadow:0 0 0 5px rgba(102,126,234,0.15);
+      transform:translateY(-2px)}
+    .form-input::placeholder{color:#cbd5e1}
+
+    /* Password toggle button */
+    .password-toggle{position:absolute;right:18px;top:50%;transform:translateY(-50%);
+      background:none;border:none;color:#94a3b8;cursor:pointer;font-size:18px;
+      padding:5px;transition:all 0.3s ease}
+    .password-toggle:hover{color:#667eea}
+    .password-toggle.active{color:#667eea}
+
+    /* Password strength indicator */
+    .password-strength{margin-top:8px;display:none}
+    .password-strength.active{display:block}
+    .strength-bars{display:flex;gap:6px;margin-bottom:6px}
+    .strength-bar{height:4px;flex:1;background:#e2e8f0;border-radius:2px;transition:all 0.3s ease}
+    .strength-bar.filled{background:#667eea}
+    .strength-bar.filled.weak{background:#ef4444}
+    .strength-bar.filled.medium{background:#f59e0b}
+    .strength-bar.filled.strong{background:#10b981}
+    .strength-text{font-size:12px;color:#64748b;font-weight:500}
+
+    .role-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+    .role-card{padding:24px 20px;border:2.5px solid #e2e8f0;border-radius:16px;text-align:center;
+      cursor:pointer;background:#fff;transition:all 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
+      position:relative}
+    .role-card:hover{border-color:#a5b4fc;transform:translateY(-4px);
+      box-shadow:0 12px 24px rgba(102,126,234,0.2)}
+    .role-card.selected{border-color:#667eea;background:linear-gradient(135deg,rgba(102,126,234,0.1),rgba(118,75,162,0.1));
+      box-shadow:0 12px 24px rgba(102,126,234,0.25)}
+    .role-card i{font-size:36px;margin-bottom:12px;color:#667eea;display:block;
+      transition:transform 0.3s ease}
+    .role-card:hover i,.role-card.selected i{transform:scale(1.15)}
+    .role-card span{font-weight:600;color:#1e293b;font-size:16px;display:block}
+    .role-card .checkmark{position:absolute;top:12px;right:12px;width:24px;height:24px;
+      background:#10b981;border-radius:50%;display:none;align-items:center;justify-content:center}
+    .role-card.selected .checkmark{display:flex;animation:scaleIn 0.3s cubic-bezier(0.175,0.885,0.32,1.275)}
+    @keyframes scaleIn{from{transform:scale(0)}to{transform:scale(1)}}
+    .role-card .checkmark i{font-size:12px;color:#fff;margin:0}
+
+    .submit-btn{width:100%;padding:18px;border-radius:14px;background:linear-gradient(135deg,#667eea,#764ba2);
+      color:#fff;font-size:17px;font-weight:700;border:none;margin-top:12px;cursor:pointer;
+      box-shadow:0 12px 28px rgba(102,126,234,0.35);transition:all 0.3s ease;
+      display:flex;align-items:center;justify-content:center;gap:10px;position:relative;overflow:hidden}
+    
+    .submit-btn::before{content:'';position:absolute;top:50%;left:50%;width:0;height:0;
+      border-radius:50%;background:rgba(255,255,255,0.3);transform:translate(-50%,-50%);
+      transition:width 0.6s,height 0.6s}
+    .submit-btn:active::before{width:400px;height:400px}
+    .submit-btn:hover{transform:translateY(-3px);box-shadow:0 18px 38px rgba(102,126,234,0.45)}
+    .submit-btn:active{transform:translateY(0)}
+
+    .footer{text-align:center;padding:0 40px 40px;font-size:15px;color:#64748b;
+      animation:fadeIn 0.6s ease-out 0.5s backwards}
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+    .footer a{color:#667eea;text-decoration:none;font-weight:600;transition:all 0.3s ease}
+    .footer a:hover{color:#764ba2;text-decoration:underline}
+
+    .error-message{background:linear-gradient(135deg,#fee2e2,#fecaca);color:#991b1b;
+      padding:16px 18px;border-radius:14px;margin-bottom:24px;
+      border-left:5px solid #dc2626;display:flex;align-items:center;gap:12px;
+      animation:shake 0.5s ease-in-out,fadeInDown 0.6s ease-out}
+    @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}
+                    75%{transform:translateX(8px)}}
+    @keyframes fadeInDown{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
+    .error-message i{font-size:20px;color:#dc2626}
+    .error-message span{font-weight:500}
+
+    .success-message{background:linear-gradient(135deg,#d1fae5,#a7f3d0);color:#065f46;
+      padding:16px 18px;border-radius:14px;margin-bottom:24px;
+      border-left:5px solid #10b981;display:flex;align-items:center;gap:12px;
+      animation:fadeInDown 0.6s ease-out}
+    .success-message i{font-size:20px;color:#10b981}
+
+    /* Verification badge */
+    .verification-badge{display:inline-flex;align-items:center;gap:6px;
+      background:rgba(16,185,129,0.1);color:#047857;padding:6px 14px;
+      border-radius:20px;font-size:13px;font-weight:600;margin-left:8px}
+    .verification-badge i{font-size:14px}
+
+    /* Responsive */
+    @media (max-width:640px){
+      .container{margin:10px}
+      .header{padding:36px 28px}
+      .logo{width:75px;height:75px}
+      .logo i{font-size:36px}
+      .header h1{font-size:28px}
+      .form-content{padding:36px 28px}
+      .footer{padding:0 28px 36px}
+      .role-grid{grid-template-columns:1fr}
+      .form-input{padding:14px 16px 14px 48px;font-size:15px}
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+
+<div class="container">
+
+  <div class="header">
+    <div class="logo"><i class="fas fa-hospital"></i></div>
+    <h1>Create Account</h1>
+    <p>Join MediCare for better healthcare
+     
+    </p>
+  </div>
+
+  <div class="form-content">
+    <form th:action="@{/signup}" method="post">
+      
+      <!-- SERVER MESSAGE -->
+      <div th:if="${msg != null}" class="error-message">
+        <i class="fas fa-exclamation-circle"></i>
+        <span th:text="${msg}">Error</span>
+      </div>
+
+      <!-- SUCCESS MESSAGE (if any) -->
+      <div th:if="${success != null}" class="success-message">
+        <i class="fas fa-check-circle"></i>
+        <span th:text="${success}">Success</span>
+      </div>
+
+      <!-- EMAIL FIELD -->
+      <div class="form-group">
+        <label for="username">
+          <i class="fas fa-envelope"></i>
+          Email Address
+        </label>
+        <div class="input-wrapper">
+          <i class="input-icon fas fa-envelope"></i>
+          <input type="email" id="username" name="username" class="form-input"
+                 placeholder="your.email@example.com" required 
+                 autocomplete="email" />
+        </div>
+      </div>
+
+      <!-- PASSWORD -->
+      <div class="form-group">
+        <label for="password">
+          <i class="fas fa-lock"></i>
+          Password
+        </label>
+        <div class="input-wrapper">
+          <i class="input-icon fas fa-lock"></i>
+          <input type="password" id="password" name="password" class="form-input"
+                 placeholder="Create a strong password" minlength="6" required 
+                 autocomplete="new-password" />
+          <button type="button" class="password-toggle" id="togglePassword">
+            <i class="fas fa-eye"></i>
+          </button>
+        </div>
+        <div class="password-strength" id="passwordStrength">
+          <div class="strength-bars">
+            <div class="strength-bar" id="bar1"></div>
+            <div class="strength-bar" id="bar2"></div>
+            <div class="strength-bar" id="bar3"></div>
+            <div class="strength-bar" id="bar4"></div>
+          </div>
+          <div class="strength-text" id="strengthText">Enter password to check strength</div>
+        </div>
+      </div>
+
+      <!-- ROLE -->
+      <div class="form-group">
+        <label>
+          <i class="fas fa-user-tag"></i>
+          Select Your Role
+        </label>
+        <div class="role-grid">
+
+          <label class="role-card" id="role-doc-card">
+            <input type="radio" name="role" value="doctor" hidden>
+            <div class="checkmark"><i class="fas fa-check"></i></div>
+            <i class="fas fa-user-md"></i>
+            <span>Doctor</span>
+          </label>
+
+          <label class="role-card selected" id="role-patient-card">
+            <input type="radio" name="role" value="patient" checked hidden>
+            <div class="checkmark"><i class="fas fa-check"></i></div>
+            <i class="fas fa-user"></i>
+            <span>Patient</span>
+          </label>
+
+        </div>
+      </div>
+
+      <button type="submit" class="submit-btn">
+        <i class="fas fa-user-plus"></i>
+        <span>Create Account</span>
+      </button>
+
+    </form>
+  </div>
+
+  <div class="footer">
+    Already have an account?
+    <a th:href="@{/home}">Sign in here</a>
+  </div>
+
+</div>
+
+<script>
+  // SELECT ROLE UI
+  const cards = document.querySelectorAll('.role-card');
+  cards.forEach(card => {
+    card.addEventListener('click', () => {
+      cards.forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      card.querySelector("input").checked = true;
+    });
+  });
+
+  // PASSWORD VISIBILITY TOGGLE
+  const togglePassword = document.getElementById('togglePassword');
+  const passwordInput = document.getElementById('password');
+  const toggleIcon = togglePassword.querySelector('i');
+
+  togglePassword.addEventListener('click', function() {
+    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+    passwordInput.setAttribute('type', type);
+    
+    // Toggle icon
+    if (type === 'text') {
+      toggleIcon.classList.remove('fa-eye');
+      toggleIcon.classList.add('fa-eye-slash');
+      togglePassword.classList.add('active');
+    } else {
+      toggleIcon.classList.remove('fa-eye-slash');
+      toggleIcon.classList.add('fa-eye');
+      togglePassword.classList.remove('active');
+    }
+  });
+
+  // PASSWORD STRENGTH CHECKER
+  const strengthIndicator = document.getElementById('passwordStrength');
+  const strengthText = document.getElementById('strengthText');
+  const bars = [
+    document.getElementById('bar1'),
+    document.getElementById('bar2'),
+    document.getElementById('bar3'),
+    document.getElementById('bar4')
+  ];
+
+  passwordInput.addEventListener('input', function() {
+    const password = this.value;
+    
+    if (password.length === 0) {
+      strengthIndicator.classList.remove('active');
+      return;
+    }
+    
+    strengthIndicator.classList.add('active');
+    
+    let strength = 0;
+    const checks = {
+      length: password.length >= 8,
+      lowercase: /[a-z]/.test(password),
+      uppercase: /[A-Z]/.test(password),
+      number: /[0-9]/.test(password),
+      special: /[^A-Za-z0-9]/.test(password)
+    };
+    
+    if (checks.length) strength++;
+    if (checks.lowercase) strength++;
+    if (checks.uppercase) strength++;
+    if (checks.number) strength++;
+    if (checks.special) strength++;
+    
+    // Reset all bars
+    bars.forEach(bar => {
+      bar.classList.remove('filled', 'weak', 'medium', 'strong');
+    });
+    
+    // Fill bars based on strength
+    let strengthClass = '';
+    let strengthLabel = '';
+    
+    if (strength <= 2) {
+      strengthClass = 'weak';
+      strengthLabel = 'Weak password';
+      for (let i = 0; i < 1; i++) {
+        bars[i].classList.add('filled', strengthClass);
+      }
+    } else if (strength <= 4) {
+      strengthClass = 'medium';
+      strengthLabel = 'Medium strength';
+      for (let i = 0; i < 3; i++) {
+        bars[i].classList.add('filled', strengthClass);
+      }
+    } else {
+      strengthClass = 'strong';
+      strengthLabel = 'Strong password!';
+      bars.forEach(bar => {
+        bar.classList.add('filled', strengthClass);
+      });
+    }
+    
+    strengthText.textContent = strengthLabel;
+  });
+
+  // EMAIL VALIDATION
+  document.querySelector("form").addEventListener("submit", (e) => {
+    const email = document.getElementById("username").value.trim();
+    if (!email.includes("@") || !email.includes(".")) {
+      e.preventDefault();
+      alert("Please enter a valid email address.");
+      return false;
+    }
+    
+    const password = document.getElementById("password").value;
+    if (password.length < 6) {
+      e.preventDefault();
+      alert("Password must be at least 6 characters long.");
+      return false;
+    }
+  });
+
+  // INPUT ANIMATIONS
+  const inputs = document.querySelectorAll('.form-input');
+  inputs.forEach(input => {
+    input.addEventListener('focus', function() {
+      this.parentElement.style.transform = 'scale(1.01)';
+    });
+    
+    input.addEventListener('blur', function() {
+      this.parentElement.style.transform = 'scale(1)';
+    });
+  });
+</script>
+
+</body>
+</html>
