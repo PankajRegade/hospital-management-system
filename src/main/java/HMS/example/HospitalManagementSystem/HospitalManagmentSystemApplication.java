@@ -1,4 +1,4 @@
-package HMS.example.HospitalManagmentSystem;
+package HMS.example.HospitalManagementSystem;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

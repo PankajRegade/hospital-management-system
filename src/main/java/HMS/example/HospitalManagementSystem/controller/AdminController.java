@@ -1,7 +1,5 @@
-package HMS.example.HospitalManagmentSystem.controller;
+package HMS.example.HospitalManagementSystem.controller;
 
-import HMS.example.HospitalManagmentSystem.model.Doctor;
-import HMS.example.HospitalManagmentSystem.model.Patient;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -12,6 +10,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import HMS.example.HospitalManagementSystem.model.Doctor;
+import HMS.example.HospitalManagementSystem.model.Patient;
 import jakarta.servlet.http.HttpSession;
 import java.time.LocalDateTime;
 import java.util.List;

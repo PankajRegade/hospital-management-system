@@ -1,8 +1,5 @@
-package HMS.example.HospitalManagmentSystem.controller;
+package HMS.example.HospitalManagementSystem.controller;
 
-import HMS.example.HospitalManagmentSystem.model.Appointment;
-import HMS.example.HospitalManagmentSystem.model.AppointmentStatus;
-import HMS.example.HospitalManagmentSystem.model.Doctor;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -11,6 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
+import HMS.example.HospitalManagementSystem.model.Appointment;
+import HMS.example.HospitalManagementSystem.model.AppointmentStatus;
+import HMS.example.HospitalManagementSystem.model.Doctor;
 import jakarta.servlet.http.HttpSession;
 
 import java.time.LocalDateTime;

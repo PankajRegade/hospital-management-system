@@ -1,4 +1,4 @@
-package HMS.example.HospitalManagmentSystem.model;
+package HMS.example.HospitalManagementSystem.model;
 
 import jakarta.persistence.*;
 

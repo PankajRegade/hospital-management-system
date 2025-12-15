@@ -1,4 +1,4 @@
-package HMS.example.HospitalManagmentSystem;
+package HMS.example.HospitalManagementSystem;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -10,7 +10,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import HMS.example.HospitalManagmentSystem.model.Login;
+import HMS.example.HospitalManagementSystem.model.Login;
 
 
 

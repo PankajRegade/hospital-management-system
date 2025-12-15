@@ -28,7 +28,7 @@
             <div class="mb-3">
                 <label class="form-label">Status</label>
                 <select name="status" class="form-select" required>
-                    <option th:each="s : ${T(HMS.example.HospitalManagmentSystem.model.AppointmentStatus).values()}"
+                    <option th:each="s : ${T(HMS.example.HospitalManagementSystem.model.AppointmentStatus).values()}"
                             th:value="${s}" th:text="${s}"
                             th:selected="${s == appointment.status}">
                     </option>

@@ -1,7 +1,4 @@
-package HMS.example.HospitalManagmentSystem.controller;
-
-import HMS.example.HospitalManagmentSystem.model.*;
-import HMS.example.HospitalManagmentSystem.service.EmailService;
+package HMS.example.HospitalManagementSystem.controller;
 
 import org.hibernate.*;
 import org.hibernate.query.Query;
@@ -13,6 +10,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import HMS.example.HospitalManagementSystem.model.*;
+import HMS.example.HospitalManagementSystem.service.EmailService;
 import jakarta.servlet.http.HttpSession;
 
 import java.time.LocalDate;

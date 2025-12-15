@@ -1,6 +1,5 @@
-package HMS.example.HospitalManagmentSystem.service;
+package HMS.example.HospitalManagementSystem.service;
 
-import HMS.example.HospitalManagmentSystem.model.Appointment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +8,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
+import HMS.example.HospitalManagementSystem.model.Appointment;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import java.time.format.DateTimeFormatter;

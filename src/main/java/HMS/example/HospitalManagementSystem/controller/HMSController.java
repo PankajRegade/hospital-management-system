@@ -1,7 +1,5 @@
-package HMS.example.HospitalManagmentSystem.controller;
+package HMS.example.HospitalManagementSystem.controller;
 
-import HMS.example.HospitalManagmentSystem.model.*;
-import HMS.example.HospitalManagmentSystem.service.EmailService;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -13,6 +11,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import HMS.example.HospitalManagementSystem.model.*;
+import HMS.example.HospitalManagementSystem.service.EmailService;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
