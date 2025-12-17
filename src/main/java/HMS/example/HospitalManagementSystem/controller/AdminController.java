@@ -10,6 +10,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import HMS.example.HospitalManagementSystem.model.Contact;
 import HMS.example.HospitalManagementSystem.model.Doctor;
 import HMS.example.HospitalManagementSystem.model.Patient;
 import jakarta.servlet.http.HttpSession;
@@ -83,7 +84,7 @@ public class AdminController {
     }
 
 
-    // ❌ NO /doctors/new – admin will NOT create doctors manually
+    //  NO /doctors/new – admin will NOT create doctors manually
 
     // ----------------- EDIT DOCTOR (ONLY FIELDS FROM Doctor.java) -----------------
     @GetMapping("/doctors/edit/{id}")
@@ -365,4 +366,98 @@ public class AdminController {
             ss.close();
         }
     }
+    // ---------- ADMIN: view "Get in Touch" submissions ----------
+    @GetMapping("/contacts")
+    public String viewContactSubmissions(HttpSession httpSession, Model model) {
+
+        Object roleObj = httpSession.getAttribute("role");
+        if (roleObj == null || !"admin".equalsIgnoreCase(roleObj.toString())) {
+            model.addAttribute("msg", "Please login as admin.");
+            return "home";
+        }
+
+        Session session = sf.openSession();
+        try {
+            Query<Contact> q =
+                    session.createQuery("from Contact order by id desc", Contact.class);
+            List<Contact> contacts = q.list();
+            model.addAttribute("contacts", contacts);
+            return "admin_contacts_details";
+        } finally {
+            session.close();
+        }
+    }
+ // ---------- ADMIN: view single contact ----------
+    @GetMapping("/contacts/view/{id}")
+    public String viewSingleContact(@PathVariable("id") Long id,
+                                    HttpSession httpSession,
+                                    Model model,
+                                    RedirectAttributes ra) {
+
+        Object roleObj = httpSession.getAttribute("role");
+        if (roleObj == null || !"admin".equalsIgnoreCase(roleObj.toString())) {
+            ra.addFlashAttribute("msg", "Please login as admin.");
+            return "redirect:/home";
+        }
+
+        Session session = sf.openSession();
+        try {
+            Contact contact = session.get(Contact.class, id);
+
+            if (contact == null) {
+                ra.addFlashAttribute("msg", "Contact not found.");
+                return "redirect:/admin/contacts";
+            }
+
+            // ✅ THIS WAS MISSING
+            model.addAttribute("contact", contact);
+
+            return "admin_contact_view"; // your HTML file name
+
+        } finally {
+            session.close();
+        }
+    }
+
+    @PostMapping("/contacts/delete/{id}")
+    public String deleteContact(@PathVariable("id") Long id,
+                                HttpSession httpSession,
+                                RedirectAttributes ra,
+                                Model model) {
+
+        Object roleObj = httpSession.getAttribute("role");
+        if (roleObj == null || !"admin".equalsIgnoreCase(roleObj.toString())) {
+            ra.addFlashAttribute("msg", "Please login as admin.");
+            return "redirect:/home";
+        }
+
+        Session session = sf.openSession();
+        Transaction tx = null;
+
+        try {
+            tx = session.beginTransaction();
+
+            Contact contact = session.get(Contact.class, id);
+            if (contact != null) {
+                session.delete(contact);
+                ra.addFlashAttribute("msg", "Contact deleted successfully ✅");
+            } else {
+                ra.addFlashAttribute("msg", "Contact not found.");
+            }
+
+            tx.commit();
+            return "redirect:/admin/contacts";
+
+        } catch (Exception e) {
+            if (tx != null) tx.rollback();
+            e.printStackTrace();
+            ra.addFlashAttribute("msg", "Error deleting contact.");
+            return "redirect:/admin/contacts";
+        } finally {
+            session.close();
+        }
+    }
+
+
+
 }

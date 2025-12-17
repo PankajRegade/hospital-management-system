@@ -11,7 +11,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
+import HMS.example.HospitalManagementSystem.model.Contact;
 import HMS.example.HospitalManagementSystem.model.*;
 import HMS.example.HospitalManagementSystem.service.EmailService;
 import jakarta.servlet.http.HttpSession;
@@ -861,36 +861,25 @@ public class HMSController {
     @RequestMapping("contactPage")
     public String contact() { return "contact"; }
 
-    @RequestMapping("/contact")
-    public String contactSubmit(@ModelAttribute contact contact, Model model) {
-        Session session = sf.openSession();
-        Transaction tx = session.beginTransaction();
-        session.save(contact);
-        tx.commit();
-        session.close();
-        return "contact";
-    }
-
-    // ---------- ADMIN: view "Get in Touch" submissions ----------
-    @GetMapping("/admin/contacts")
-    public String viewContactSubmissions(HttpSession httpSession, Model model) {
-        // Check admin login
-        Object roleObj = httpSession.getAttribute("role");
-        if (roleObj == null || !"admin".equalsIgnoreCase(roleObj.toString())) {
-            model.addAttribute("msg", "Please login as admin to view this page.");
-            return "home";
-        }
+ // ---------- submit contact form ----------
+    @PostMapping("/contact")
+    public String contactSubmit(@ModelAttribute Contact contact, Model model) {
 
         Session session = sf.openSession();
+        Transaction tx = null;
         try {
-            Query<contact> q = session.createQuery("from contact order by id desc", contact.class);
-            List<contact> contacts = q.list();
-            model.addAttribute("contacts", contacts);
-            return "admin_contacts_details";   // Thymeleaf page
+            tx = session.beginTransaction();
+            session.save(contact);
+            tx.commit();
         } finally {
             session.close();
         }
+
+        model.addAttribute("msg", "Thank you! Your message has been sent successfully.");
+        return "home";
     }
+
+    
 
     @RequestMapping("doctors")
     public String DoctorPage () {

@@ -5,6 +5,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
@@ -29,7 +30,7 @@ public class MedicalRecordController {
     @Autowired
     private SessionFactory sf;
 
-    // configure storage dir (change to config)
+
     private final Path storageDir = Paths.get(System.getProperty("user.dir"), "uploads", "reports");
 
     public MedicalRecordController() {
@@ -135,35 +136,38 @@ public class MedicalRecordController {
 
     // ---------- doctor: new record form ----------
     @GetMapping("/doctor/records/new")
-    public String newRecordForm(@RequestParam(value = "patientId", required = false) Long patientId,
-                                Model model, HttpSession session) {
+    public String newRecordForm(
+            @RequestParam(value = "appointmentId", required = false) Long appointmentId,
+            Model model,
+            HttpSession session) {
+
         Long doctorId = toLong(session.getAttribute("doctorId"));
         if (doctorId == null) {
             model.addAttribute("msg", "Please login as doctor.");
             return "home";
         }
+
         Session ss = sf.openSession();
         try {
-            if (patientId != null) {
-                // try both Long and Integer PK lookups (safe)
-                Object patientObj = null;
-                try {
-                    patientObj = ss.get(Patient.class, patientId);
-                } catch (Exception ignored) {}
-                if (patientObj == null) {
-                    try {
-                        patientObj = ss.get(Patient.class, patientId.intValue());
-                    } catch (Exception ignored) {}
-                }
-                Patient p = (Patient) patientObj;
-                model.addAttribute("patient", p);
-            }
             model.addAttribute("doctorId", doctorId);
-            return "doctor_add_record"; // template where doctor fills diagnosis/prescription + uploads
+
+            if (appointmentId != null) {
+                Appointment ap = ss.get(Appointment.class, appointmentId);
+
+                if (ap != null && ap.getDoctor().getId().equals(doctorId)) {
+                    model.addAttribute("appointment", ap);          // 🔥 IMPORTANT
+                    model.addAttribute("appointmentId", ap.getId());
+                    model.addAttribute("patient", ap.getPatient());
+                }
+            }
+
+            return "doctor_add_record";
+
         } finally {
             ss.close();
         }
     }
+
 
     // ---------- doctor: create record (with file uploads) ----------
     @PostMapping("/doctor/records")
@@ -241,7 +245,6 @@ public class MedicalRecordController {
                 if (ap != null) mr.setAppointment(ap);
             }
 
-            // persist medical record and flush to force SQL execution
             ss.save(mr);
             ss.flush();
             System.out.println("[DEBUG] saved MedicalRecord id=" + mr.getId());
@@ -288,41 +291,41 @@ public class MedicalRecordController {
         }
     }
 
-    // ---------- download file ----------
     @GetMapping("/records/files/{id}")
-    public void downloadFile(@PathVariable("id") Integer id, HttpServletResponse response) {
+    public ResponseEntity<byte[]> downloadFile(@PathVariable("id") Integer id) {
+
         Session ss = sf.openSession();
         try {
-            Query<RecordReport> rq = ss.createQuery("from RecordReport r where r.id = :id", RecordReport.class);
-            rq.setParameter("id", id);
-            RecordReport rr = rq.uniqueResult();
-
+            RecordReport rr = ss.get(RecordReport.class, id);
             if (rr == null) {
-                response.setStatus(404);
-                return;
+                return ResponseEntity.notFound().build();
             }
+
             Path file = storageDir.resolve(rr.getFileName());
             if (!Files.exists(file)) {
-                response.setStatus(404);
-                return;
+                return ResponseEntity.notFound().build();
             }
-            response.setContentType(rr.getContentType() != null ? rr.getContentType() : "application/octet-stream");
-            response.setHeader("Content-Disposition", "attachment; filename=\"" + rr.getOriginalName() + "\"");
-            try (FileInputStream in = new FileInputStream(file.toFile());
-                 OutputStream out = response.getOutputStream()) {
-                byte[] buffer = new byte[8192];
-                int len;
-                while ((len = in.read(buffer)) != -1) {
-                    out.write(buffer, 0, len);
-                }
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            response.setStatus(500);
+
+            byte[] data = Files.readAllBytes(file);
+
+            return ResponseEntity.ok()
+                .header(org.springframework.http.HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"" + rr.getOriginalName() + "\"")
+                .header(org.springframework.http.HttpHeaders.CONTENT_TYPE,
+                        rr.getContentType() != null ? rr.getContentType() : "application/pdf")
+                .header(org.springframework.http.HttpHeaders.CONTENT_LENGTH,
+                        String.valueOf(data.length))
+                .body(data);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
         } finally {
             ss.close();
         }
-    }@GetMapping("/doctor/records")
+    }
+
+    @GetMapping("/doctor/records")
     public String doctorAllRecords(Model model, HttpSession session) {
 
         Long doctorId = toLong(session.getAttribute("doctorId"));
@@ -353,34 +356,6 @@ public class MedicalRecordController {
         }
     }
 
-    // ---------- doctor: view record details ----------
-    @GetMapping("/doctor/records/{id}")
-    public String viewRecordForDoctor(@PathVariable("id") Integer id, Model model, HttpSession session) {
-        Long doctorId = toLong(session.getAttribute("doctorId"));
-        if (doctorId == null) {
-            model.addAttribute("msg", "Please login as doctor.");
-            return "home";
-        }
-
-        Session ss = sf.openSession();
-        try {
-            Query<MedicalRecord> q = ss.createQuery(
-                "select distinct m from MedicalRecord m " +
-                "left join fetch m.reports r " +
-                "left join fetch m.patient p " +
-                "left join fetch m.appointment a " +
-                "where m.id = :id", MedicalRecord.class);
-            q.setParameter("id", id);
-            MedicalRecord mr = q.uniqueResult();
-
-            if (mr == null || mr.getDoctor() == null || !doctorId.equals(toLong(mr.getDoctor().getId()))) {
-                model.addAttribute("msg", "Record not found or access denied.");
-                return "redirect:/doctor";
-            }
-            model.addAttribute("record", mr);
-            return "doctor_record_details";
-        } finally {
-            ss.close();
-        }
-    }
+    
+    
 }

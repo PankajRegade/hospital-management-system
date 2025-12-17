@@ -1,62 +1,282 @@
-<!doctype html>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <title th:text="'Medical Records · ' + (${patientName} ?: 'Patient')">Medical Records</title>
-  <style>
-    body{font-family:Arial,Helvetica,sans-serif;background:#f4f6fb;padding:20px}
-    .container{max-width:980px;margin:0 auto}
-    .card{background:#fff;border-radius:10px;padding:18px;box-shadow:0 6px 18px rgba(0,0,0,0.06);margin-bottom:14px}
-    h1{color:#1f2937;margin-bottom:12px}
-    .row{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
-    .meta{color:#6b7280;font-size:13px}
-    .summary{margin-top:8px;color:#374151}
-    .btn{display:inline-block;padding:8px 12px;background:#667eea;color:#fff;border-radius:8px;text-decoration:none}
-    .empty{text-align:center;color:#6b7280;padding:30px}
-    .attachments{margin-top:8px;font-size:13px;color:#374151}
-    .small{font-size:13px;color:#6b7280}
-  </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title th:text="'Medical Records · ' + (${patientName} ?: 'Patient')">Medical Records | Axes</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+
+    <style>
+        :root {
+            --primary: #facc15;
+            --primary-hover: #eab308;
+            --bg-dark: #020617;
+            --surface: #0f172a;
+            --surface-light: #1e293b;
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+            --border: rgba(255, 255, 255, 0.08);
+            --glass: rgba(30, 41, 59, 0.6);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(250, 204, 21, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(59, 130, 246, 0.05) 0%, transparent 40%);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 24px;
+        }
+
+        .header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        h1 i { color: var(--primary); font-size: 24px; }
+
+        .back-btn {
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.2s;
+        }
+
+        .back-btn:hover { color: var(--primary); }
+
+        /* Record Cards */
+        .record-card {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 28px;
+            margin-bottom: 20px;
+            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .record-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(250, 204, 21, 0.3);
+            background: rgba(30, 41, 59, 0.8);
+        }
+
+        .record-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .record-id-badge {
+            background: rgba(250, 204, 21, 0.1);
+            color: var(--primary);
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .record-date {
+            font-size: 14px;
+            color: var(--text-dim);
+            font-weight: 500;
+        }
+
+        .diagnosis-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #fff;
+        }
+
+        .diagnosis-text {
+            color: var(--text-dim);
+            font-size: 15px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .meta-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--text-dim);
+        }
+
+        .meta-item i { color: var(--primary); width: 14px; }
+
+        /* Attachments */
+        .attachments-section {
+            margin-top: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .file-chip {
+            background: var(--surface-light);
+            border: 1px solid var(--border);
+            padding: 8px 16px;
+            border-radius: 12px;
+            color: var(--text-main);
+            text-decoration: none;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.2s;
+        }
+
+        .file-chip:hover {
+            background: var(--primary);
+            color: var(--bg-dark);
+            border-color: var(--primary);
+        }
+
+        .btn-view {
+            background: var(--primary);
+            color: var(--bg-dark);
+            padding: 10px 20px;
+            border-radius: 14px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.3s;
+        }
+
+        .btn-view:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 20px rgba(250, 204, 21, 0.2);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            background: var(--glass);
+            border-radius: 32px;
+            border: 1px dashed var(--border);
+        }
+
+        .empty-icon {
+            font-size: 50px;
+            color: var(--surface-light);
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 640px) {
+            .record-header { flex-direction: column; gap: 10px; }
+            .meta-info { gap: 10px; }
+            .header-section { flex-direction: column; align-items: flex-start; gap: 15px; }
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <h1 th:text="'Medical Records for ' + (${patientName} ?: 'Patient')">Medical Records</h1>
 
-    <div th:if="${records == null or #lists.isEmpty(records)}" class="card empty">
-      No medical records found.
-    </div>
-
-    <div th:if="${records != null and !#lists.isEmpty(records)}">
-      <div th:each="rec : ${records}" class="card">
-        <div class="row">
-          <div>
-            <div style="font-weight:700">Record #<span th:text="${rec.id}">1</span></div>
-            <div class="small">
-              Date: 
-              <span th:text="${rec.recordDate != null ? #temporals.format(rec.recordDate,'dd-MMM-yyyy') : '-'}">—</span>
-              &nbsp;|&nbsp;
-              Doctor: <span th:text="${rec.doctor != null ? rec.doctor.name : '-'}">Dr X</span>
-              <span th:if="${rec.appointment != null}"> &nbsp;|&nbsp; Appt# <span th:text="${rec.appointment.id}">0</span></span>
-            </div>
-
-            <div class="summary" th:text="${rec.diagnosis != null ? (rec.diagnosis.length() > 120 ? rec.diagnosis.substring(0,120) + '...' : rec.diagnosis) : 'No diagnosis recorded.'}">Diagnosis summary</div>
-
-            <div class="attachments" th:if="${rec.reports != null and !#lists.isEmpty(rec.reports)}">
-              Attachments:
-              <span th:each="r,iterStat : ${rec.reports}">
-                <a th:href="@{|/records/files/${r.id}|}" th:text="${r.originalName != null ? r.originalName : r.fileName}">file.pdf</a>
-                <span th:if="${!iterStat.last}">,&nbsp;</span>
-              </span>
-            </div>
-
-            <div class="small" th:if="${rec.reports == null or #lists.isEmpty(rec.reports)}">No attachments</div>
-          </div>
-
-          <div style="text-align:right">
-            <a class="btn" th:href="@{|/patient/records/${rec.id}|}">View details</a>
-          </div>
+    <div class="container">
+        <div class="header-section">
+            <h1 th:text="'Medical Records for ' + (${patientName} ?: 'Patient')">
+                <i class="fas fa-file-medical"></i> Medical Records
+            </h1>
+            <a th:href="@{/patient/dashboard}" class="back-btn">
+                <i class="fas fa-arrow-left"></i> Return to Dashboard
+            </a>
         </div>
-      </div>
+
+        <!-- Empty State -->
+        <div th:if="${records == null or #lists.isEmpty(records)}" class="empty-state">
+            <div class="empty-icon"><i class="fas fa-folder-open"></i></div>
+            <h2 style="color:#fff; margin-bottom:8px;">No records yet</h2>
+            <p style="color:var(--text-dim)">Your clinical history will appear here once uploaded by your care team.</p>
+        </div>
+
+        <!-- Records List -->
+        <div th:if="${records != null and !#lists.isEmpty(records)}">
+            <div th:each="rec : ${records}" class="record-card">
+                <div class="record-header">
+                    <div>
+                        <span class="record-id-badge" th:text="'ID: #' + ${rec.id}">ID: #001</span>
+                        <div class="record-date" th:text="${rec.recordDate != null ? #temporals.format(rec.recordDate,'dd MMMM yyyy') : 'Date Unknown'}">
+                            12 December 2025
+                        </div>
+                    </div>
+                    <a class="btn-view" th:href="@{|/patient/records/${rec.id}|}">
+                        Full Details <i class="fas fa-chevron-right"></i>
+                    </a>
+                </div>
+
+                <div class="diagnosis-title">Clinical Findings</div>
+                <div class="diagnosis-text" th:text="${rec.diagnosis != null ? (rec.diagnosis.length() > 200 ? rec.diagnosis.substring(0,200) + '...' : rec.diagnosis) : 'No specific diagnosis recorded for this visit.'}">
+                    Diagnosis summary will appear here, providing a brief overview of the clinical observation.
+                </div>
+
+                <div class="meta-info">
+                    <div class="meta-item">
+                        <i class="fas fa-user-md"></i>
+                        <span th:text="${rec.doctor != null ? 'Dr. ' + rec.doctor.name : 'Unknown Practitioner'}">Doctor Name</span>
+                    </div>
+                    <div class="meta-item" th:if="${rec.appointment != null}">
+                        <i class="fas fa-calendar-check"></i>
+                        <span th:text="'Visit Ref: ' + ${rec.appointment.id}">Visit #123</span>
+                    </div>
+                </div>
+
+                <!-- Attachments section -->
+                <div class="attachments-section" th:if="${rec.reports != null and !#lists.isEmpty(rec.reports)}">
+                    <a th:each="r : ${rec.reports}" th:href="@{|/records/files/${r.id}|}" class="file-chip">
+                        <i class="fas fa-file-pdf"></i>
+                        <span th:text="${r.originalName != null ? r.originalName : 'Report.pdf'}">document.pdf</span>
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
+
+    <footer style="text-align: center; padding: 40px 0; color: var(--text-dim); font-size: 13px;">
+        <p>Axes Secure Record Portal &copy; 2025. End-to-end encrypted medical data.</p>
+    </footer>
+
 </body>
 </html>

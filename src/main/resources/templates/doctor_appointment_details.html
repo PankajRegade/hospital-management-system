@@ -3,482 +3,514 @@
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title th:text="'Appointment Details - ' + ${appointment.id}">Appointment Details</title>
+    <title th:text="'Appointment Details - ' + ${appointment.id}">Appointment Details | Nexus Health</title>
     
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" 
-          integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
-    
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
     <style>
+        /* --- Modern Reset & Variables (Midnight Rose & Fuchsia Theme) --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         :root {
-            --primary-color: #4A90E2;
-            --success-color: #27AE60;
-            --warning-color: #F39C12;
-            --danger-color: #E74C3C;
-            --light-bg: #F8F9FA;
-            --card-shadow: 0 4px 6px rgba(0,0,0,0.07);
-            --card-shadow-hover: 0 8px 15px rgba(0,0,0,0.12);
+            --primary-glow: radial-gradient(rgba(244, 114, 182, 0.4), rgba(131, 24, 67, 0));
+            --accent-pink: #f472b6;
+            --accent-fuchsia: #d946ef;
+            --bg-dark: #1a0a12;
+            --card-bg: rgba(30, 10, 20, 0.45);
+            --card-border: rgba(255, 255, 255, 0.06);
+            --text-main: #fdf2f8;
+            --text-dim: #9d174d;
+            --text-muted: #f9a8d4;
+            --transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            --glass-shadow: 0 8px 32px 0 rgba(131, 24, 67, 0.3);
         }
 
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(circle at 0% 0%, rgba(131, 24, 67, 0.3) 0, transparent 40%), 
+                radial-gradient(circle at 100% 100%, rgba(244, 114, 182, 0.15) 0, transparent 40%);
+            color: var(--text-main);
             min-height: 100vh;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            padding-bottom: 2rem;
+            overflow-x: hidden;
+            line-height: 1.6;
+            padding: 2.5rem;
         }
 
+        /* --- Animated Mesh Background --- */
+        .bg-blobs {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+            filter: blur(100px);
+            opacity: 0.7;
+        }
+
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            mix-blend-mode: screen;
+            animation: float 25s infinite alternate ease-in-out;
+        }
+
+        .blob-1 { width: 500px; height: 500px; background: #831843; top: -100px; left: -100px; opacity: 0.2; }
+        .blob-2 { width: 450px; height: 450px; background: var(--accent-pink); bottom: -100px; right: -100px; opacity: 0.1; animation-delay: -5s; }
+        .blob-3 { width: 300px; height: 300px; background: #be185d; top: 40%; left: 30%; opacity: 0.1; animation-duration: 30s; }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+            33% { transform: translate(50px, -70px) scale(1.1) rotate(10deg); }
+            66% { transform: translate(-30px, 30px) scale(0.9) rotate(-10deg); }
+            100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            animation: fadeIn 1s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- Header Styling --- */
         .page-header {
-            background: white;
-            border-radius: 15px;
-            padding: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 2.5rem;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--card-border);
+            border-radius: 28px;
             margin-bottom: 2rem;
-            box-shadow: var(--card-shadow);
-            animation: slideDown 0.5s ease-out;
+            box-shadow: var(--glass-shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .page-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent-pink), transparent);
+            opacity: 0.2;
         }
 
         .page-header h1 {
-            color: #2C3E50;
-            font-weight: 700;
-            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 800;
             display: flex;
             align-items: center;
+            gap: 1.25rem;
+            background: linear-gradient(to right, #fff, var(--accent-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        .page-header h1 i {
-            background: linear-gradient(135deg, var(--primary-color), #667eea);
-            color: white;
-            padding: 0.8rem;
-            border-radius: 12px;
-            margin-right: 1rem;
-            font-size: 1.2rem;
-        }
-
-        .appointment-card {
-            background: white;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: var(--card-shadow);
-            transition: all 0.3s ease;
-            animation: fadeInUp 0.6s ease-out;
-            border: none;
-        }
-
-        .appointment-card:hover {
-            box-shadow: var(--card-shadow-hover);
-            transform: translateY(-2px);
-        }
-
-        .card-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-            color: white !important;
-            padding: 1.5rem;
-            border: none;
-        }
-
-        .card-header h5 {
-            margin: 0;
-            font-weight: 600;
-            font-size: 1.3rem;
-        }
-
-        .status-badge {
-            position: absolute;
-            top: 1.5rem;
-            right: 1.5rem;
-            font-size: 0.9rem;
-            padding: 0.6em 1.2em;
-            border-radius: 25px;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-            animation: pulse 2s infinite;
-        }
-
-        .badge-success {
-            background: linear-gradient(135deg, var(--success-color), #2ECC71) !important;
-        }
-
-        .badge-warning {
-            background: linear-gradient(135deg, var(--warning-color), #F1C40F) !important;
-        }
-
-        .badge-danger {
-            background: linear-gradient(135deg, var(--danger-color), #C0392B) !important;
-        }
-
-        .card-body {
-            padding: 2.5rem;
-            position: relative;
-        }
-
-        .info-section {
-            background: var(--light-bg);
-            border-radius: 12px;
-            padding: 1.8rem;
-            margin-bottom: 1.5rem;
-            border-left: 4px solid var(--primary-color);
-            transition: all 0.3s ease;
-        }
-
-        .info-section:hover {
-            background: #E8F4F8;
-            border-left-color: #667eea;
-            transform: translateX(5px);
-        }
-
-        .info-row {
-            display: flex;
-            align-items: center;
-            margin-bottom: 1.2rem;
-            animation: slideIn 0.5s ease-out;
-        }
-
-        .info-row:last-child {
-            margin-bottom: 0;
-        }
-
-        .info-icon {
-            width: 45px;
-            height: 45px;
-            border-radius: 10px;
+        .header-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, rgba(131, 24, 67, 0.4), rgba(244, 114, 182, 0.1));
+            border-radius: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-right: 1rem;
-            font-size: 1.2rem;
+            color: var(--accent-pink);
+            box-shadow: inset 0 0 10px rgba(244, 114, 182, 0.1);
+        }
+
+        /* --- Main Details Card --- */
+        .detail-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid var(--card-border);
+            border-radius: 32px;
+            overflow: hidden;
+            transition: var(--transition);
+            box-shadow: var(--glass-shadow);
+        }
+
+        .card-banner {
+            height: 8px;
+            background: linear-gradient(90deg, var(--accent-fuchsia), var(--accent-pink));
+        }
+
+        .card-content {
+            padding: 3rem;
+        }
+
+        .status-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3rem;
+        }
+
+        .appointment-id {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        /* --- Status Badge --- */
+        .status-badge {
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .badge-confirmed { background: rgba(244, 114, 182, 0.1); color: var(--accent-pink); border: 1px solid rgba(244, 114, 182, 0.2); }
+        .badge-pending { background: rgba(251, 191, 36, 0.1); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.2); }
+        .badge-cancelled { background: rgba(239, 68, 68, 0.1); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.2); }
+
+        /* --- Info Grid --- */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .info-tile {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--card-border);
+            border-radius: 22px;
+            padding: 1.75rem;
+            display: flex;
+            gap: 1.5rem;
+            transition: var(--transition);
+        }
+
+        .info-tile:hover {
+            background: rgba(244, 114, 182, 0.04);
+            border-color: rgba(244, 114, 182, 0.2);
+            transform: translateY(-5px);
+        }
+
+        .tile-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, rgba(131, 24, 67, 0.4), rgba(244, 114, 182, 0.1));
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-pink);
+            font-size: 1.25rem;
             flex-shrink: 0;
         }
 
-        .icon-patient {
-            background: linear-gradient(135deg, #3498DB, #2980B9);
-            color: white;
-        }
-
-        .icon-time {
-            background: linear-gradient(135deg, #9B59B6, #8E44AD);
-            color: white;
-        }
-
-        .icon-notes {
-            background: linear-gradient(135deg, #E67E22, #D35400);
-            color: white;
-        }
-
-        .info-content {
-            flex: 1;
-        }
-
-        .info-label {
-            font-size: 0.85rem;
-            color: #7F8C8D;
-            font-weight: 600;
+        .tile-data .label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 0.3rem;
+            font-weight: 800;
+            letter-spacing: 0.1em;
+            margin-bottom: 6px;
         }
 
-        .info-value {
-            font-size: 1.1rem;
-            color: #2C3E50;
-            font-weight: 500;
+        .tile-data .value {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text-main);
         }
 
-        .info-value.highlight {
-            color: var(--primary-color);
-            font-weight: 600;
+        .highlight-value {
+            color: var(--accent-pink) !important;
         }
 
-        .card-footer {
-            background: var(--light-bg) !important;
-            padding: 1.5rem 2.5rem;
-            border-top: 2px solid #E0E0E0;
+        /* --- Notes Section --- */
+        .notes-area {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 24px;
+            padding: 2rem;
+            border: 1px solid var(--card-border);
         }
 
+        .notes-area .label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: var(--accent-pink);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 1rem;
+        }
+
+        .notes-area .value {
+            font-size: 0.95rem;
+            color: var(--text-main);
+            line-height: 1.8;
+            opacity: 0.9;
+        }
+
+        /* --- Action Footer --- */
+        .action-footer {
+            padding: 2.5rem 3rem;
+            background: rgba(0, 0, 0, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid var(--card-border);
+        }
+
+        /* --- Buttons --- */
         .btn {
-            padding: 0.7rem 1.5rem;
-            font-weight: 600;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            border: none;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            padding: 0.9rem 1.8rem;
+            border-radius: 16px;
+            font-weight: 700;
             font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            border: 1px solid transparent;
+            font-family: inherit;
+            position: relative;
+            overflow: hidden;
         }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: 0.5s;
+        }
+
+        .btn:hover::before { left: 100%; }
 
         .btn-primary {
-            background: linear-gradient(135deg, var(--primary-color), #667eea);
-            box-shadow: 0 4px 10px rgba(74, 144, 226, 0.3);
+            background: linear-gradient(135deg, var(--accent-pink), #831843);
+            color: white;
+            box-shadow: 0 8px 20px rgba(131, 24, 67, 0.3);
         }
 
         .btn-primary:hover {
-            background: linear-gradient(135deg, #357ABD, #5568d3);
-            box-shadow: 0 6px 15px rgba(74, 144, 226, 0.4);
-            transform: translateY(-2px);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 25px rgba(131, 24, 67, 0.5);
         }
 
         .btn-danger {
-            background: linear-gradient(135deg, var(--danger-color), #C0392B);
-            box-shadow: 0 4px 10px rgba(231, 76, 60, 0.3);
+            background: rgba(239, 68, 68, 0.1);
+            color: #f87171;
+            border-color: rgba(239, 68, 68, 0.2);
         }
 
         .btn-danger:hover {
-            background: linear-gradient(135deg, #C0392B, #A93226);
-            box-shadow: 0 6px 15px rgba(231, 76, 60, 0.4);
-            transform: translateY(-2px);
+            background: #ef4444;
+            color: white;
+            box-shadow: 0 8px 20px rgba(239, 68, 68, 0.3);
+            transform: translateY(-3px);
         }
 
         .btn-secondary {
-            background: linear-gradient(135deg, #95A5A6, #7F8C8D);
-            color: white;
-            box-shadow: 0 4px 10px rgba(149, 165, 166, 0.3);
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-main);
+            border-color: var(--card-border);
         }
 
         .btn-secondary:hover {
-            background: linear-gradient(135deg, #7F8C8D, #6C7A7B);
-            box-shadow: 0 6px 15px rgba(149, 165, 166, 0.4);
-            transform: translateY(-2px);
-            color: white;
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--accent-pink);
+            transform: translateY(-3px);
         }
 
-        .action-buttons {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-
-        .back-link {
+        /* --- Quick Actions Grid --- */
+        .quick-actions {
             margin-top: 2rem;
-            display: inline-block;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
         }
 
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .quick-btn {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--card-border);
+            padding: 1.75rem;
+            border-radius: 24px;
+            text-align: center;
+            color: var(--text-main);
+            text-decoration: none;
+            transition: var(--transition);
+            box-shadow: var(--glass-shadow);
         }
 
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .quick-btn:hover {
+            background: rgba(244, 114, 182, 0.08);
+            border-color: var(--accent-pink);
+            transform: translateY(-8px);
         }
 
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateX(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
+        .quick-btn i {
+            display: block;
+            font-size: 1.75rem;
+            color: var(--accent-pink);
+            margin-bottom: 12px;
         }
 
-        @keyframes pulse {
-            0%, 100% {
-                box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-            }
-            50% {
-                box-shadow: 0 4px 15px rgba(0,0,0,0.25);
-            }
+        .quick-btn span {
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
         }
 
         @media (max-width: 768px) {
-            .page-header {
-                padding: 1.5rem;
-            }
-
-            .card-body {
-                padding: 1.5rem;
-            }
-
-            .card-footer {
-                padding: 1.5rem;
-            }
-
-            .status-badge {
-                position: static;
-                display: inline-block;
-                margin-bottom: 1rem;
-            }
-
-            .info-row {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .info-icon {
-                margin-bottom: 0.5rem;
-            }
-
-            .action-buttons {
-                flex-direction: column;
-            }
-
-            .btn {
-                width: 100%;
-            }
-        }
-
-        .tooltip-info {
-            cursor: help;
-            color: var(--primary-color);
-            margin-left: 0.5rem;
-        }
-
-        .quick-actions {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-top: 1.5rem;
-            box-shadow: var(--card-shadow);
-        }
-
-        .quick-actions h6 {
-            color: #2C3E50;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-        }
-
-        .quick-actions h6 i {
-            margin-right: 0.5rem;
-            color: var(--primary-color);
+            body { padding: 1.5rem; }
+            .action-footer { flex-direction: column; gap: 1.5rem; padding: 2rem; }
+            .quick-actions { grid-template-columns: 1fr; }
+            .status-section { flex-direction: column; align-items: flex-start; gap: 1.5rem; }
+            .page-header { flex-direction: column; gap: 1.5rem; text-align: center; }
         }
     </style>
 </head>
 <body>
 
-    <div class="container mt-4 mb-5">
+    <div class="bg-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <div class="container">
         
+        <!-- Header -->
         <div class="page-header">
             <h1>
-                <i class="fas fa-calendar-check"></i>
-                <span>Appointment Details</span>
+                <div class="header-icon"><i class="fas fa-calendar-check"></i></div>
+                Appointment Details
             </h1>
-        </div>
-
-        <div class="appointment-card">
-            <div class="card-header">
-                <h5>
-                    <i class="fas fa-file-medical-alt mr-2"></i>
-                    Appointment ID: <span th:text="${appointment.id}">123</span>
-                </h5>
-            </div>
-            
-            <div class="card-body">
-                
-                <span th:classappend="${appointment.status == 'CONFIRMED'} ? 'badge badge-success' : 
-                                         (${appointment.status == 'PENDING'} ? 'badge badge-warning' : 
-                                          'badge badge-danger')" 
-                      class="status-badge text-uppercase"
-                      th:text="${appointment.status}">CONFIRMED</span>
-
-                <div class="info-section">
-                    
-                    <div class="info-row">
-                        <div class="info-icon icon-patient">
-                            <i class="fas fa-user"></i>
-                        </div>
-                        <div class="info-content">
-                            <div class="info-label">Patient Name</div>
-                            <div class="info-value" th:text="${appointment.patient != null ? appointment.patient.name : 'Not Assigned'}">
-                                John Doe
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="info-row">
-                        <div class="info-icon icon-time">
-                            <i class="far fa-clock"></i>
-                        </div>
-                        <div class="info-content">
-                            <div class="info-label">Appointment Date & Time</div>
-                            <div class="info-value highlight" th:text="${#temporals.format(appointment.appointmentTime, 'EEEE, dd MMMM yyyy • HH:mm')}">
-                                Monday, 01 January 2025 • 10:00
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="info-row">
-                        <div class="info-icon icon-notes">
-                            <i class="fas fa-notes-medical"></i>
-                        </div>
-                        <div class="info-content">
-                            <div class="info-label">Appointment Notes</div>
-                            <div class="info-value" th:text="${appointment.notes != null && !appointment.notes.isEmpty() ? appointment.notes : 'No notes provided'}">
-                                Regular checkup and follow-up consultation for ongoing treatment.
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-
-            </div>
-
-            <div class="card-footer">
-                <div class="action-buttons">
-                    
-                    <a class="btn btn-primary"
-                       th:href="@{'/doctor/appointments/' + ${appointment.id} + '/edit'}">
-                        <i class="fas fa-edit mr-2"></i> Edit Appointment
-                    </a>
-
-                    <form th:action="@{'/appointments/' + ${appointment.id} + '/cancel'}"
-                          method="post"
-                          style="display:inline;">
-                        <button type="submit"
-                                class="btn btn-danger"
-                                onclick="return confirm('Are you sure you want to cancel this appointment? This action cannot be undone.');">
-                            <i class="fas fa-times-circle mr-2"></i> Cancel Appointment
-                        </button>
-                    </form>
-
-                </div>
-            </div>
-
-        </div>
-
-        <div class="quick-actions">
-            <h6>
-                <i class="fas fa-bolt"></i>
-                Quick Actions
-            </h6>
-            <div class="action-buttons">
-                <a href="#" class="btn btn-outline-primary btn-sm">
-                    <i class="fas fa-print mr-1"></i> Print Details
-                </a>
-                <a href="#" class="btn btn-outline-primary btn-sm">
-                    <i class="fas fa-envelope mr-1"></i> Send Reminder
-                </a>
-                <a href="#" class="btn btn-outline-primary btn-sm">
-                    <i class="fas fa-history mr-1"></i> View History
-                </a>
-            </div>
-        </div>
-        
-        <div class="back-link">
             <a th:href="@{/appointments/doctor}" class="btn btn-secondary">
-                <i class="fas fa-arrow-left mr-2"></i> Back to Appointments
+                <i class="fas fa-arrow-left"></i>
+                <span>Back to List</span>
+            </a>
+        </div>
+
+        <!-- Main Card -->
+        <div class="detail-card">
+            <div class="card-banner"></div>
+            
+            <div class="card-content">
+                <div class="status-section">
+                    <div class="appointment-id">
+                        APP-ID: <span th:text="'#' + ${appointment.id}" style="color: var(--text-main);">#12345</span>
+                    </div>
+                    
+                    <span th:class="${appointment.status == 'CONFIRMED'} ? 'status-badge badge-confirmed' : 
+                                     (${appointment.status == 'PENDING'} ? 'status-badge badge-pending' : 
+                                      'status-badge badge-cancelled')">
+                        <i th:class="${appointment.status == 'CONFIRMED'} ? 'fas fa-check-circle' : 
+                                     (${appointment.status == 'PENDING'} ? 'fas fa-clock' : 'fas fa-times-circle')"></i>
+                        <span th:text="${appointment.status}">CONFIRMED</span>
+                    </span>
+                </div>
+
+                <div class="info-grid">
+                    <!-- Patient -->
+                    <div class="info-tile">
+                        <div class="tile-icon"><i class="fas fa-user-injured"></i></div>
+                        <div class="tile-data">
+                            <div class="label">Patient Profile</div>
+                            <div class="value" th:text="${appointment.patient != null ? appointment.patient.name : 'Not Assigned'}">John Doe</div>
+                        </div>
+                    </div>
+
+                    <!-- Date/Time -->
+                    <div class="info-tile">
+                        <div class="tile-icon"><i class="fas fa-calendar-day"></i></div>
+                        <div class="tile-data">
+                            <div class="label">Scheduled Time</div>
+                            <div class="value highlight-value" th:text="${#temporals.format(appointment.appointmentTime, 'EEE, dd MMM yyyy • HH:mm')}">
+                                Mon, 12 Oct 2025 • 10:30
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notes -->
+                <div class="notes-area">
+                    <div class="label"><i class="fas fa-file-medical-alt"></i> Clinical Briefing</div>
+                    <div class="value" th:text="${appointment.notes != null && !appointment.notes.isEmpty() ? appointment.notes : 'No clinical notes provided for this appointment.'}">
+                        Patient requested a general checkup and discussion about recent blood test results.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Actions -->
+            <div class="action-footer">
+                <div style="display: flex; gap: 1.25rem;">
+                    <a class="btn btn-primary" th:href="@{'/doctor/appointments/' + ${appointment.id} + '/edit'}">
+                        <i class="fas fa-edit"></i>
+                        Modify Schedule
+                    </a>
+                </div>
+
+                <form th:action="@{'/appointments/' + ${appointment.id} + '/cancel'}" method="post">
+                    <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to cancel this appointment?');">
+                        <i class="fas fa-calendar-times"></i>
+                        Cancel Appointment
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Secondary Quick Actions -->
+        <div class="quick-actions">
+            <a href="#" class="quick-btn">
+                <i class="fas fa-print"></i>
+                <span>Print Record</span>
+            </a>
+            <a href="#" class="quick-btn">
+                <i class="fas fa-bell"></i>
+                <span>Send Reminder</span>
+            </a>
+            <a href="#" class="quick-btn">
+                <i class="fas fa-history"></i>
+                <span>Patient History</span>
             </a>
         </div>
         
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
-
+    <script>
+        // Subtle Mouse Glow Effect
+        document.querySelectorAll('.info-tile, .quick-btn, .page-header').forEach(el => {
+            el.addEventListener('mousemove', (e) => {
+                const rect = el.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                el.style.setProperty('--mouse-x', `${x}px`);
+                el.style.setProperty('--mouse-y', `${y}px`);
+            });
+        });
+    </script>
 </body>
 </html>

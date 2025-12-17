@@ -1,0 +1,549 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Admin · Contact Details - AXES Hospital</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        html { scroll-behavior:smooth; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #0a192f;
+            color: #e2e8f0;
+            min-height: 100vh;
+            padding: 24px;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Mesh gradient background with aurora effect */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(circle at 15% 20%, rgba(255,107,107,0.15), transparent 40%),
+                radial-gradient(circle at 85% 30%, rgba(255,200,87,0.12), transparent 40%),
+                radial-gradient(circle at 50% 70%, rgba(72,219,251,0.15), transparent 45%),
+                radial-gradient(circle at 30% 80%, rgba(147,51,234,0.12), transparent 40%);
+            z-index: 0;
+            pointer-events: none;
+            animation: aurora 15s ease-in-out infinite;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                repeating-linear-gradient(
+                    45deg,
+                    transparent,
+                    transparent 60px,
+                    rgba(255,200,87,0.03) 60px,
+                    rgba(255,200,87,0.03) 120px
+                );
+            z-index: 0;
+            pointer-events: none;
+            animation: slide 20s linear infinite;
+        }
+
+        @keyframes aurora {
+            0%, 100% {
+                filter: hue-rotate(0deg) brightness(1);
+                transform: scale(1) rotate(0deg);
+            }
+            33% {
+                filter: hue-rotate(20deg) brightness(1.1);
+                transform: scale(1.05) rotate(2deg);
+            }
+            66% {
+                filter: hue-rotate(-15deg) brightness(0.95);
+                transform: scale(0.98) rotate(-1deg);
+            }
+        }
+
+        @keyframes slide {
+            0% { transform: translateX(0) translateY(0); }
+            100% { transform: translateX(120px) translateY(120px); }
+        }
+
+        @keyframes slideInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes ripple {
+            0% { box-shadow: 0 0 0 0 rgba(255,107,107,0.7); }
+            100% { box-shadow: 0 0 0 20px rgba(255,107,107,0); }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* NAVBAR */
+        .navbar {
+            background: rgba(15,35,56,0.85);
+            backdrop-filter: blur(16px);
+            border-radius: 20px;
+            padding: 16px 26px;
+            margin-bottom: 28px;
+            border: 1px solid rgba(255,200,87,0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            animation: slideInUp 0.6s ease;
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 700;
+            font-size: 22px;
+            text-decoration: none;
+            background: linear-gradient(135deg, #ff6b6b, #ffc857);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-brand:hover {
+            filter: brightness(1.2);
+        }
+
+        .navbar-brand-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg,#ff6b6b,#ffc857);
+            color: white;
+            box-shadow: 0 8px 24px rgba(255,107,107,0.5);
+            animation: ripple 2s ease-in-out infinite;
+        }
+
+        .navbar-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .nav-btn {
+            padding: 10px 20px;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 12px;
+            border: 1px solid rgba(72,219,251,0.3);
+            background: rgba(15,35,56,0.7);
+            color: #48dbfb;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+        }
+
+        .nav-btn:hover {
+            border-color: #48dbfb;
+            background: rgba(72,219,251,0.1);
+            transform: translateY(-2px);
+        }
+
+        .nav-btn-primary {
+            border: none;
+            background: linear-gradient(135deg,#ff6b6b,#ffc857);
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 8px 24px rgba(255,107,107,0.4);
+        }
+
+        .nav-btn-primary:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 12px 32px rgba(255,107,107,0.6);
+        }
+
+        /* PAGE HEADER */
+        .page-header {
+            margin-bottom: 28px;
+            animation: slideInUp 0.6s ease 0.2s both;
+        }
+
+        .page-title {
+            font-size: 36px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ff6b6b, #ffc857, #48dbfb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .page-subtitle {
+            font-size: 15px;
+            color: #94a3b8;
+            font-weight: 400;
+        }
+
+        /* BREADCRUMB */
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: #94a3b8;
+        }
+
+        .breadcrumb a {
+            color: #48dbfb;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .breadcrumb a:hover {
+            color: #ffc857;
+        }
+
+        .breadcrumb-separator {
+            color: #64748b;
+        }
+
+        /* CARD */
+        .card {
+            background: rgba(15,35,56,0.85);
+            border-radius: 20px;
+            border: 1px solid rgba(72,219,251,0.2);
+            padding: 32px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            margin-bottom: 22px;
+            animation: scaleIn 0.5s ease 0.3s both;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 28px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(72,219,251,0.2);
+        }
+
+        .card-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #ff6b6b, #ffc857);
+            color: white;
+            font-size: 28px;
+            box-shadow: 0 8px 24px rgba(255,107,107,0.5);
+        }
+
+        .card-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #e2e8f0;
+        }
+
+        .card-id {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 10px;
+            background: rgba(72,219,251,0.15);
+            border: 1px solid rgba(72,219,251,0.3);
+            color: #48dbfb;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 12px;
+        }
+
+        /* DETAIL GRID */
+        .detail-grid {
+            display: grid;
+            gap: 24px;
+        }
+
+        .detail-item {
+            background: rgba(10,25,47,0.6);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid rgba(72,219,251,0.15);
+            transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+        }
+
+        .detail-item:hover {
+            background: rgba(15,35,56,0.8);
+            border-color: rgba(255,200,87,0.3);
+            transform: translateX(5px);
+        }
+
+        .detail-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: #94a3b8;
+            margin-bottom: 8px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .detail-label i {
+            color: #ffc857;
+            font-size: 14px;
+        }
+
+        .detail-value {
+            font-size: 16px;
+            color: #e2e8f0;
+            font-weight: 500;
+            line-height: 1.6;
+        }
+
+        .detail-message {
+            background: rgba(10,25,47,0.6);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid rgba(72,219,251,0.15);
+            min-height: 150px;
+        }
+
+        .detail-message .detail-value {
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        /* ACTIONS */
+        .actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 28px;
+            padding-top: 24px;
+            border-top: 1px solid rgba(72,219,251,0.2);
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-back {
+            background: linear-gradient(135deg, #48dbfb, #10b981);
+            color: white;
+            box-shadow: 0 8px 24px rgba(72,219,251,0.4);
+        }
+
+        .btn-back:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 12px 32px rgba(72,219,251,0.6);
+        }
+
+        .btn-secondary {
+            background: rgba(72,219,251,0.15);
+            color: #48dbfb;
+            border: 1px solid rgba(72,219,251,0.3);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(72,219,251,0.25);
+            transform: translateY(-2px);
+        }
+
+        /* FOOTER */
+        .footer {
+            margin-top: 32px;
+            text-align: center;
+            font-size: 13px;
+            color: #64748b;
+            padding: 20px;
+            border-top: 1px solid rgba(72,219,251,0.2);
+        }
+
+        .footer a {
+            color: #ffc857;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .footer a:hover {
+            color: #ff6b6b;
+        }
+
+        @media(max-width: 768px) {
+            body { padding: 16px; }
+            .navbar {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+            .page-title { font-size: 28px; }
+            .card { padding: 20px; }
+            .actions {
+                flex-direction: column;
+            }
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <a class="navbar-brand" th:href="@{/admin/dashboard}">
+            <div class="navbar-brand-icon">
+                <i class="fas fa-shield-heart"></i>
+            </div>
+            AXES Admin
+        </a>
+
+        <div class="navbar-actions">
+            <a th:href="@{/admin/dashboard}" class="nav-btn">
+                <i class="fas fa-gauge"></i> Dashboard
+            </a>
+            <a th:href="@{/admin/contacts}" class="nav-btn nav-btn-primary">
+                <i class="fas fa-envelope-open-text"></i> All Contacts
+            </a>
+            <a th:href="@{/logoutPage}" class="nav-btn">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+    </nav>
+
+    <!-- BREADCRUMB -->
+    <div class="breadcrumb">
+        <a th:href="@{/admin/dashboard}"><i class="fas fa-home"></i> Dashboard</a>
+        <span class="breadcrumb-separator">›</span>
+        <a th:href="@{/admin/contacts}">Contact Requests</a>
+        <span class="breadcrumb-separator">›</span>
+        <span>Details</span>
+    </div>
+
+    <!-- PAGE HEADER -->
+    <header class="page-header">
+        <h1 class="page-title">
+            <span>📧 Contact Submission Details</span>
+        </h1>
+        <p class="page-subtitle">
+            Complete information about this contact request
+        </p>
+    </header>
+
+    <!-- MAIN CARD -->
+    <section class="card">
+        <div class="card-header">
+            <div class="card-icon">
+                <i class="fas fa-address-card"></i>
+            </div>
+            <div>
+                <h2 class="card-title">
+                    Contact Information
+                    <span class="card-id" th:text="'ID: ' + ${contact.id}">ID: 1</span>
+                </h2>
+            </div>
+        </div>
+
+        <div class="detail-grid">
+            <!-- Name -->
+            <div class="detail-item">
+                <div class="detail-label">
+                    <i class="fas fa-user"></i>
+                    Full Name
+                </div>
+                <div class="detail-value" th:text="${contact.name}">John Doe</div>
+            </div>
+
+            <!-- Email -->
+            <div class="detail-item">
+                <div class="detail-label">
+                    <i class="fas fa-envelope"></i>
+                    Email Address
+                </div>
+                <div class="detail-value" th:text="${contact.email}">john@example.com</div>
+            </div>
+
+            <!-- Phone -->
+            <div class="detail-item">
+                <div class="detail-label">
+                    <i class="fas fa-phone"></i>
+                    Phone Number
+                </div>
+                <div class="detail-value" th:text="${contact.phone}">+91 9999999999</div>
+            </div>
+
+            <!-- Message -->
+            <div class="detail-message">
+                <div class="detail-label">
+                    <i class="fas fa-comment-dots"></i>
+                    Message Content
+                </div>
+                <div class="detail-value" th:text="${contact.message}">
+                    This is a sample message from the contact form...
+                </div>
+            </div>
+        </div>
+
+        <!-- ACTIONS -->
+        <div class="actions">
+            <a th:href="@{/admin/contacts}" class="btn btn-back">
+                <i class="fas fa-arrow-left"></i>
+                Back to All Contacts
+            </a>
+            <a th:href="@{/admin/dashboard}" class="btn btn-secondary">
+                <i class="fas fa-gauge"></i>
+                Go to Dashboard
+            </a>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        &copy; <span th:text="${#dates.format(#dates.createNow(), 'yyyy')}">2024</span>
+        AXES Hospital · Admin Panel
+    </footer>
+
+</div>
+
+</body>
+</html>
