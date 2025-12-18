@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.FileSystemResource; // ✅ Added for attachments
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -14,8 +15,10 @@ import HMS.example.HospitalManagementSystem.model.MedicalRecord;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 
+import java.io.File; // ✅ Added
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List; // ✅ Added
 
 @Service
 public class EmailService {
@@ -31,7 +34,7 @@ public class EmailService {
     private static final DateTimeFormatter DT_FMT = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm");
 
     /**
-     * Attempt to send appointment confirmation. Returns true on success, false otherwise.
+     * Attempt to send appointment confirmation.
      */
     public boolean sendAppointmentConfirmation(String toEmail, Appointment appointment) {
         if (toEmail == null || toEmail.trim().isEmpty()) {
@@ -211,9 +214,9 @@ public class EmailService {
     }
 
     /**
-     * 🔹 NEW: Send Medical Record details to the Patient
+     * 🔹 SEND MEDICAL RECORD TO PATIENT (WITH ATTACHMENTS)
      */
-    public boolean sendMedicalRecordToPatient(String toEmail, String doctorName, MedicalRecord record) {
+    public boolean sendMedicalRecordToPatient(String toEmail, String doctorName, MedicalRecord record, List<File> filesToAttach) {
         if (toEmail == null || toEmail.trim().isEmpty()) {
             return false;
         }
@@ -224,9 +227,11 @@ public class EmailService {
         }
 
         try {
-            log.info("Sending medical record email to {}", toEmail);
+            int attachmentCount = (filesToAttach != null) ? filesToAttach.size() : 0;
+            log.info("Sending medical record email to {} with {} attachments", toEmail, attachmentCount);
 
             MimeMessage message = mailSender.createMimeMessage();
+            // True = multipart (allows attachments)
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
             String subject = "Medical Record Summary - Dr. " + doctorName;
@@ -252,12 +257,24 @@ public class EmailService {
                     row("Treatment Plan", record.getTreatment()) +
                     "</table>" +
 
+                    "<p style='margin-top:15px;'><strong>Attachments:</strong> " + attachmentCount + " file(s) attached.</p>" +
+
                     "<p style='margin-top:20px; color:#64748b; font-size:12px;'>" +
                     "Disclaimer: This email contains private medical information. If you received this in error, please delete it immediately." +
                     "</p>" +
                     "</div></body></html>";
 
-            helper.setText("Please view this email in a generic HTML client to see your medical record.", html);
+            helper.setText(html, true); // true = HTML
+
+            // 📎 ATTACH FILES LOGIC
+            if (filesToAttach != null && !filesToAttach.isEmpty()) {
+                for (File file : filesToAttach) {
+                    if (file.exists()) {
+                        FileSystemResource fileResource = new FileSystemResource(file);
+                        helper.addAttachment(file.getName(), fileResource);
+                    }
+                }
+            }
 
             mailSender.send(message);
             log.info("Medical record email successfully sent to {}", toEmail);
@@ -267,6 +284,11 @@ public class EmailService {
             log.error("Failed to send medical record email: {}", ex.getMessage());
             return false;
         }
+    }
+    
+    // Overload method for backward compatibility (no attachments)
+    public boolean sendMedicalRecordToPatient(String toEmail, String doctorName, MedicalRecord record) {
+        return sendMedicalRecordToPatient(toEmail, doctorName, record, null);
     }
 
     /**

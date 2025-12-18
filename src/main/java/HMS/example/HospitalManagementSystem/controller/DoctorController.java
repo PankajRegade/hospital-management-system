@@ -7,19 +7,30 @@ import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import HMS.example.HospitalManagementSystem.model.Appointment;
 import HMS.example.HospitalManagementSystem.model.AppointmentStatus;
 import HMS.example.HospitalManagementSystem.model.Doctor;
 import HMS.example.HospitalManagementSystem.model.MedicalRecord;
 import HMS.example.HospitalManagementSystem.model.Patient;
+// If you have a RecordReport model for database tracking of files, import it here
+// import HMS.example.HospitalManagementSystem.model.RecordReport; 
 import HMS.example.HospitalManagementSystem.service.EmailService;
 import jakarta.servlet.http.HttpSession;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 @Controller
 @RequestMapping("/doctor")
@@ -30,6 +41,18 @@ public class DoctorController {
 
     @Autowired
     private EmailService emailService;
+
+    // Define storage location for uploaded files
+    private final Path storageDir = Paths.get(System.getProperty("user.dir"), "uploads", "reports");
+
+    public DoctorController() {
+        // Create upload directory if it doesn't exist
+        try {
+            Files.createDirectories(storageDir);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     // ---------------------------------------------------
     // Helper
@@ -355,16 +378,16 @@ public class DoctorController {
     }
 
     // ===================================================
-    // 💾 SAVE MEDICAL RECORD (AND EMAIL)
+    // 💾 SAVE MEDICAL RECORD (AND EMAIL WITH ATTACHMENTS)
     // ===================================================
-    // 🔴 THIS WAS MISSING
     @PostMapping("/records")
     public String saveMedicalRecord(@RequestParam Integer patientId,
                                     @RequestParam(required = false) Long appointmentId,
                                     @RequestParam String diagnosis,
                                     @RequestParam String prescription,
-                                    @RequestParam String treatment, // ✅ New Field
+                                    @RequestParam String treatment,
                                     @RequestParam(required = false) String notes,
+                                    @RequestParam(value = "files", required = false) MultipartFile[] files,
                                     HttpSession session,
                                     Model model) {
 
@@ -375,6 +398,7 @@ public class DoctorController {
 
         Session ss = sf.openSession();
         Transaction tx = null;
+        List<File> savedFilesForEmail = new ArrayList<>();
 
         try {
             tx = ss.beginTransaction();
@@ -393,15 +417,41 @@ public class DoctorController {
             record.setPatient(patient);
             record.setAppointment(appointment);
             record.setRecordDate(java.time.LocalDate.now());
-            
             record.setDiagnosis(diagnosis);
             record.setPrescription(prescription);
-            record.setTreatment(treatment); // ✅ Saving Treatment
+            record.setTreatment(treatment);
             record.setNotes(notes);
 
             ss.persist(record);
+
+            // 📁 Handle File Uploads
+            if (files != null) {
+                for (MultipartFile f : files) {
+                    if (f != null && !f.isEmpty()) {
+                        String original = StringUtils.cleanPath(f.getOriginalFilename());
+                        String ext = "";
+                        int idx = original.lastIndexOf('.');
+                        if (idx >= 0) ext = original.substring(idx);
+
+                        String uniqueName = UUID.randomUUID().toString() + ext;
+                        Path targetPath = storageDir.resolve(uniqueName);
+                        
+                        // Save to Disk
+                        Files.copy(f.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
+                        
+                        // Add to list for Email Attachment
+                        savedFilesForEmail.add(targetPath.toFile());
+
+                        // (Optional) Save metadata to DB if you have a RecordReport entity
+                        // RecordReport rr = new RecordReport();
+                        // rr.setFileName(uniqueName);
+                        // rr.setMedicalRecord(record);
+                        // ss.save(rr);
+                    }
+                }
+            }
             
-            // Optional: Mark appointment complete
+            // Mark appointment complete
             if (appointment != null) {
                 appointment.setStatus(AppointmentStatus.COMPLETED);
                 ss.update(appointment);
@@ -409,16 +459,20 @@ public class DoctorController {
 
             tx.commit();
 
-            // 📧 Send Email
+            // 📧 Send Email with Attachments
             try {
                 if (patient.getEmail() != null && !patient.getEmail().isEmpty()) {
+                    System.out.println("Sending Medical Record Email with " + savedFilesForEmail.size() + " attachments.");
+                    
                     emailService.sendMedicalRecordToPatient(
                         patient.getEmail(),
                         doctor.getName(),
-                        record
+                        record,
+                        savedFilesForEmail // Passing list of files
                     );
                 }
             } catch (Exception e) {
+                System.err.println("Email failed to send: " + e.getMessage());
                 e.printStackTrace();
             }
 
@@ -479,7 +533,7 @@ public class DoctorController {
     }
 
     // ===================================================
-    // EMAIL MEDICAL RECORD (Existing Record)
+    // EMAIL MEDICAL RECORD (Existing Record - No New Attachments)
     // ===================================================
     @PostMapping("/records/{id}/email")
     public String emailMedicalRecord(@PathVariable Integer id,
@@ -501,10 +555,12 @@ public class DoctorController {
 
             Patient patient = record.getPatient();
             if (patient != null && patient.getEmail() != null && !patient.getEmail().isEmpty()) {
+                // Sending without new attachments for existing records
                 emailService.sendMedicalRecordToPatient(
                     patient.getEmail(),
                     record.getDoctor().getName(),
-                    record
+                    record,
+                    null 
                 );
             }
 
