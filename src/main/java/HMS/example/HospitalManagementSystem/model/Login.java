@@ -4,9 +4,10 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.time.LocalDateTime; // 1. Import for date handling
 
 @Entity
-@Table(name = "login")   // optional, but good to be explicit
+@Table(name = "login")
 public class Login {
 
     @Id
@@ -19,13 +20,19 @@ public class Login {
     @Column(name = "role")
     private String role;
 
-    // 🔹 NEW: email verification flag
     @Column(name = "email_verified")
     private Boolean emailVerified = Boolean.FALSE;
 
-    // 🔹 NEW: verification code stored until verified
     @Column(name = "verification_code")
     private String verificationCode;
+
+    // 🔹 NEW: Tracks if the user is currently online (for Admin view/logic)
+    @Column(name = "is_logged_in")
+    private Boolean isLoggedIn = false;
+
+    // 🔹 NEW: Tracks the exact time of the last successful login
+    @Column(name = "last_login_date")
+    private LocalDateTime lastLoginDate;
 
     public Login() {
         super();
@@ -38,9 +45,9 @@ public class Login {
         this.role = role;
         this.emailVerified = Boolean.FALSE;
         this.verificationCode = null;
+        this.isLoggedIn = false;
     }
 
-    // You can also add a constructor including verificationCode if needed
     public Login(String username, String password, String role, String verificationCode) {
         super();
         this.username = username;
@@ -48,6 +55,7 @@ public class Login {
         this.role = role;
         this.emailVerified = Boolean.FALSE;
         this.verificationCode = verificationCode;
+        this.isLoggedIn = false;
     }
 
     // -------- getters & setters --------
@@ -92,14 +100,31 @@ public class Login {
         this.verificationCode = verificationCode;
     }
 
+    // -------- NEW getters & setters --------
+
+    public Boolean getIsLoggedIn() {
+        return isLoggedIn;
+    }
+
+    public void setIsLoggedIn(Boolean isLoggedIn) {
+        this.isLoggedIn = isLoggedIn;
+    }
+
+    public LocalDateTime getLastLoginDate() {
+        return lastLoginDate;
+    }
+
+    public void setLastLoginDate(LocalDateTime lastLoginDate) {
+        this.lastLoginDate = lastLoginDate;
+    }
+
     @Override
     public String toString() {
         return "Login[" +
                 "username=" + username +
-                ", password=" + password +
                 ", role=" + role +
                 ", emailVerified=" + emailVerified +
-                ", verificationCode=" + verificationCode +
+                ", isLoggedIn=" + isLoggedIn +
                 "]";
     }
 }

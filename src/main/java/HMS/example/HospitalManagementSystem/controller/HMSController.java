@@ -32,6 +32,9 @@ import java.util.UUID;
 
 @Controller
 public class HMSController {
+	// 🔐 Track active logged-in users (username → session)
+	private static final java.util.concurrent.ConcurrentHashMap<String, HttpSession>
+	        activeUserSessions = new java.util.concurrent.ConcurrentHashMap<>();
 
     private static final Logger log = LoggerFactory.getLogger(HMSController.class);
 
@@ -109,7 +112,7 @@ public class HMSController {
         return "login";   // login.html
     }
 
-    // ---------- process login (POST) ----------
+ // ---------- process login (POST) ----------
     @PostMapping("/login")
     public String login(@RequestParam("username") String username,
                         @RequestParam("password") String password,
@@ -139,14 +142,8 @@ public class HMSController {
                 return "login";
             }
 
-            // DEBUG (you can comment this in prod)
-            System.out.println(
-                    "LOGIN DEBUG -> inputUser=" + uname +
-                            ", inputPwd=" + password +
-                            ", inputRole=" + r +
-                            ", dbPwd=" + dblogin.getPassword() +
-                            ", dbRole=" + dblogin.getRole()
-            );
+            // DEBUG
+            System.out.println("LOGIN DEBUG -> inputUser=" + uname + ", inputRole=" + r);
 
             // ❌ generic message if password mismatch
             if (!dblogin.getPassword().equals(password)) {
@@ -160,11 +157,33 @@ public class HMSController {
                 return "login";
             }
 
-            // 1.5) Email verification check for patient + doctor
+            // -----------------------------------------------------------
+            // 🛑 NEW LOGIC: SINGLE SESSION ENFORCEMENT
+            // -----------------------------------------------------------
+            if (activeUserSessions.containsKey(uname)) {
+                HttpSession existingSession = activeUserSessions.get(uname);
+                try {
+                    // We try to access the existing session to see if it's still valid
+                    existingSession.getCreationTime(); 
+                    
+                    // If line above didn't throw exception, the user is still logged in elsewhere
+                    model.addAttribute("msg", "You are already logged in on another device or browser.");
+                    return "login";
+                    
+                } catch (IllegalStateException e) {
+                    // The old session existed in our map but was invalidated (timed out),
+                    // so we clean up the map and allow the new login to proceed.
+                    activeUserSessions.remove(uname);
+                }
+            }
+            // -----------------------------------------------------------
+
+
+            // 1.5) Email verification check
             if (("patient".equalsIgnoreCase(r) || "doctor".equalsIgnoreCase(r)) &&
                     (dblogin.getEmailVerified() == null || !dblogin.getEmailVerified())) {
                 tx.commit();
-                model.addAttribute("msg", "Please verify your email before logging in. Check your inbox.");
+                model.addAttribute("msg", "Please verify your email before logging in.");
                 return "login";
             }
 
@@ -173,30 +192,19 @@ public class HMSController {
 
                 case "patient": {
                     Patient patient;
-
-                    Query<Patient> pq = session.createQuery(
-                            "from Patient where lower(trim(email)) = :e",
-                            Patient.class
-                    );
+                    Query<Patient> pq = session.createQuery("from Patient where lower(trim(email)) = :e", Patient.class);
                     pq.setParameter("e", uname.toLowerCase());
                     patient = pq.uniqueResult();
 
                     if (patient == null) {
-                        // first-time login: create minimal patient
                         patient = new Patient();
                         patient.setEmail(uname);
                         patient.setName(uname);
-                        patient.setAge(0);
-                        patient.setPhone("");
-                        patient.setAddress("");
-                        patient.setDisease("");
-                        patient.setGender("");
-
+                        // ... set defaults
                         session.save(patient);
                     }
 
                     boolean incomplete = isPatientProfileIncomplete(patient);
-
                     tx.commit();
 
                     httpSession.setAttribute("patientId", patient.getId());
@@ -204,25 +212,20 @@ public class HMSController {
                     httpSession.setAttribute("role", "patient");
                     httpSession.setAttribute("username", uname);
 
-                    if (incomplete) {
-                        return "redirect:/patient/details";
-                    }
+                    // ✅ REGISTER SESSION IN MAP
+                    activeUserSessions.put(uname, httpSession);
 
+                    if (incomplete) return "redirect:/patient/details";
                     return "redirect:/patient/dashboard";
                 }
 
                 case "doctor": {
                     Doctor doctor = null;
-
-                    // 1️⃣ Try: username matches email OR name
                     Query<Doctor> dq = session.createQuery(
-                            "from Doctor where lower(trim(email)) = :u or lower(trim(name)) = :u",
-                            Doctor.class
-                    );
+                            "from Doctor where lower(trim(email)) = :u or lower(trim(name)) = :u", Doctor.class);
                     dq.setParameter("u", uname.toLowerCase());
                     doctor = dq.uniqueResult();
 
-                    // 2️⃣ Try: username is doctor ID
                     if (doctor == null) {
                         try {
                             Long did = Long.parseLong(uname);
@@ -230,17 +233,15 @@ public class HMSController {
                         } catch (NumberFormatException ignore) {}
                     }
 
-                    // ❌ generic message if no doctor record
                     if (doctor == null) {
                         if (tx != null) tx.rollback();
                         model.addAttribute("msg", INVALID_LOGIN_MSG);
                         return "login";
                     }
 
-                    // 🔒 Approval check
                     if (!doctor.isApproved()) {
                         tx.commit();
-                        model.addAttribute("msg", "Your account is pending admin approval. Please wait for approval.");
+                        model.addAttribute("msg", "Account pending approval.");
                         return "login";
                     }
 
@@ -252,12 +253,11 @@ public class HMSController {
                     httpSession.setAttribute("username", uname);
 
                     tx.commit();
+                    
+                    // ✅ REGISTER SESSION IN MAP
+                    activeUserSessions.put(uname, httpSession);
 
-                    if (incomplete) {
-                        // redirect to doctor fill-details page
-                        return "redirect:/doctor/details";
-                    }
-
+                    if (incomplete) return "redirect:/doctor/details";
                     return "redirect:/doctor/dashboard";
                 }
 
@@ -265,6 +265,10 @@ public class HMSController {
                     tx.commit();
                     httpSession.setAttribute("role", "admin");
                     httpSession.setAttribute("username", uname);
+                    
+                    // ✅ REGISTER SESSION IN MAP (Optional: remove if admins can multi-login)
+                    activeUserSessions.put(uname, httpSession);
+                    
                     return "redirect:/admin/dashboard";
 
                 default:
@@ -281,13 +285,19 @@ public class HMSController {
             session.close();
         }
     }
-
-    // ---------- logout ----------
     @RequestMapping("/logoutPage")
     public String logoutPage(HttpSession session) {
+
+        Object unameObj = session.getAttribute("username");
+        if (unameObj != null) {
+            String uname = unameObj.toString();
+            activeUserSessions.remove(uname);
+        }
+
         session.invalidate();
         return "home";
     }
+
 
     // ---------- signup ----------
     @RequestMapping("SignupPage")
@@ -743,16 +753,22 @@ public class HMSController {
             session.close();
         }
     }
-
- // ---------- DOCTOR DETAILS (profile) ----------
     @PostMapping("/doctor/details")
-    public String saveDoctorDetails(@RequestParam("id") Long id,
-                                    @RequestParam("name") String name,
-                                    @RequestParam("specialization") String specialization,
-                                    @RequestParam(value = "phone", required = false) String phone,
-                                    @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
-                                    HttpSession httpSession,
-                                    Model model) {
+    public String saveDoctorDetails(
+            @RequestParam("id") Long id,
+            @RequestParam("name") String name,
+            @RequestParam("specialization") String specialization,
+            @RequestParam(value = "phone", required = false) String phone,
+            @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
+
+            // ✅ FIX 1: Use boolean. Spring automatically converts "true"/"false" string to boolean.
+            @RequestParam(value = "removePhoto", defaultValue = "false") boolean removePhoto,
+
+            HttpSession httpSession,
+            Model model) {
+
+        // Debugging: Check console to see if this prints "true" when you click save
+        System.out.println("DOCTOR PROFILE UPDATE -> ID: " + id + " | Remove Photo? " + removePhoto);
 
         Object didObj = httpSession.getAttribute("doctorId");
         if (didObj == null) {
@@ -760,10 +776,8 @@ public class HMSController {
             return "home";
         }
 
-        Long sessionDoctorId;
-        if (didObj instanceof Long) sessionDoctorId = (Long) didObj;
-        else if (didObj instanceof Integer) sessionDoctorId = ((Integer) didObj).longValue();
-        else sessionDoctorId = Long.parseLong(didObj.toString());
+        // Safe casting of Session ID
+        Long sessionDoctorId = (didObj instanceof Long) ? (Long) didObj : Long.parseLong(didObj.toString());
 
         if (!sessionDoctorId.equals(id)) {
             model.addAttribute("msg", "Invalid doctor id.");
@@ -772,6 +786,7 @@ public class HMSController {
 
         Session session = sf.openSession();
         Transaction tx = null;
+
         try {
             tx = session.beginTransaction();
 
@@ -781,73 +796,84 @@ public class HMSController {
                 return "fill_doctor_details";
             }
 
+            // --- Update Basic Fields ---
             d.setName(name != null ? name.trim() : d.getName());
             d.setSpecialization(specialization != null ? specialization.trim() : d.getSpecialization());
-            if (phone != null) {
-                d.setPhone(phone.trim());
-            }
-
-            //  handle profile image upload (ABSOLUTE PATH)
-            if (imageFile != null && !imageFile.isEmpty()) {
-                try {
-                    // 1) Absolute project directory
-                    String projectDir = System.getProperty("user.dir");
-                    // e.g. C:\Users\Pankaj\Desktop\HospitalManagmentSystem
-                    // 2) Absolute uploads/doctors directory
-                    Path uploadRoot = Paths.get(projectDir, DOCTOR_UPLOAD_DIR);
+            if (phone != null) d.setPhone(phone.trim());
 
 
-                    // ensure directory exists
-                    if (!Files.exists(uploadRoot)) {
-                        Files.createDirectories(uploadRoot);
+            // --- PHOTO LOGIC ---
+
+            // 1. Check Removal Request First
+            if (removePhoto) {
+                System.out.println("Removing photo for doctor: " + d.getName());
+
+                if (d.getPhotoPath() != null && !d.getPhotoPath().isEmpty()) {
+                    try {
+                        String projectDir = System.getProperty("user.dir");
+                        
+                        // ✅ FIX 2: Path sanitization. Remove leading slash if present.
+                        String storedPath = d.getPhotoPath();
+                        if (storedPath.startsWith("/") || storedPath.startsWith("\\")) {
+                            storedPath = storedPath.substring(1);
+                        }
+
+                        Path oldFilePath = Paths.get(projectDir, storedPath);
+                        
+                        // Delete the file physically
+                        boolean deleted = Files.deleteIfExists(oldFilePath);
+                        System.out.println("File deleted physicaly? " + deleted + " Path: " + oldFilePath);
+
+                    } catch (IOException e) {
+                        log.error("Failed to delete doctor image", e);
+                        // Continue execution even if file delete fails, we must update DB
                     }
-
-                    String originalName = imageFile.getOriginalFilename();
-                    String ext = ".png";
-                    if (originalName != null && originalName.contains(".")) {
-                        ext = originalName.substring(originalName.lastIndexOf("."));
-                    }
-
-                    String fileName = "doctor_" + d.getId() + ext;
-                    Path filePath = uploadRoot.resolve(fileName);
-
-                    // extra safety: ensure parent exists
-                    if (!Files.exists(filePath.getParent())) {
-                        Files.createDirectories(filePath.getParent());
-                    }
-
-                    // ❗ Now this is an ABSOLUTE path
-                    imageFile.transferTo(filePath.toFile());
-
-                    // URL that browser will use (served via WebConfig)
-                    String webPath = "/" + DOCTOR_UPLOAD_DIR + "/" + fileName;
-                    d.setPhotoPath(webPath);
-
-                    log.info("Doctor {} image saved at {}", d.getId(), filePath.toAbsolutePath());
-
-                } catch (IOException ioEx) {
-                    log.error("Error saving doctor image", ioEx);
-                    model.addAttribute("msg", "Details saved but image upload failed: " + ioEx.getMessage());
                 }
+
+                // Set DB reference to null
+                d.setPhotoPath(null);
+            } 
+            // 2. If NOT removing, Check for New Upload
+            else if (imageFile != null && !imageFile.isEmpty()) {
+                
+                String projectDir = System.getProperty("user.dir");
+                Path uploadRoot = Paths.get(projectDir, DOCTOR_UPLOAD_DIR);
+                if (!Files.exists(uploadRoot)) {
+                    Files.createDirectories(uploadRoot);
+                }
+
+                String originalName = imageFile.getOriginalFilename();
+                String ext = (originalName != null && originalName.contains("."))
+                        ? originalName.substring(originalName.lastIndexOf("."))
+                        : ".png";
+
+                // Unique filename to prevent caching issues
+                String fileName = "doctor_" + d.getId() + "_" + System.currentTimeMillis() + ext;
+                Path filePath = uploadRoot.resolve(fileName);
+
+                imageFile.transferTo(filePath.toFile());
+
+                // Save with leading slash for web access
+                d.setPhotoPath("/" + DOCTOR_UPLOAD_DIR + "/" + fileName);
+
+                log.info("Doctor {} image uploaded at {}", d.getId(), filePath);
             }
 
             session.update(d);
             tx.commit();
 
             httpSession.setAttribute("doctorName", d.getName());
-
             return "redirect:/doctor/dashboard";
 
         } catch (Exception ex) {
             if (tx != null) tx.rollback();
             ex.printStackTrace();
-            model.addAttribute("msg", "Error saving doctor details: " + ex.getMessage());
-            return "fill_doctor_details";
+            model.addAttribute("msg", "Error saving doctor details.");
+            return "redirect:/doctor/details";
         } finally {
             session.close();
         }
     }
-
     // ---------- other simple mappings ----------
     @RequestMapping("patient")
     public String patientView() { return "patient"; }

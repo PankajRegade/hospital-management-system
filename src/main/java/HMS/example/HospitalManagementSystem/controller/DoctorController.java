@@ -13,6 +13,8 @@ import HMS.example.HospitalManagementSystem.model.Appointment;
 import HMS.example.HospitalManagementSystem.model.AppointmentStatus;
 import HMS.example.HospitalManagementSystem.model.Doctor;
 import HMS.example.HospitalManagementSystem.model.MedicalRecord;
+import HMS.example.HospitalManagementSystem.model.Patient;
+import HMS.example.HospitalManagementSystem.service.EmailService;
 import jakarta.servlet.http.HttpSession;
 
 import java.time.LocalDateTime;
@@ -25,6 +27,9 @@ public class DoctorController {
 
     @Autowired
     private SessionFactory sf;
+
+    @Autowired
+    private EmailService emailService;
 
     // ---------------------------------------------------
     // Helper
@@ -176,17 +181,39 @@ public class DoctorController {
                 return "redirect:/doctor/dashboard";
             }
 
-            ap.setAppointmentTime(LocalDateTime.parse(appointmentTime));
+            // ✅ CAPTURE OLD TIME BEFORE UPDATE
+            LocalDateTime oldTime = ap.getAppointmentTime();
+
+            // UPDATE APPOINTMENT
+            LocalDateTime newTime = LocalDateTime.parse(appointmentTime);
+            ap.setAppointmentTime(newTime);
             ap.setStatus(AppointmentStatus.valueOf(status));
             ap.setNotes(notes);
 
             ss.update(ap);
             tx.commit();
 
+            // ✅ SEND EMAIL AFTER COMMIT
+            try {
+                Patient patient = ap.getPatient();
+                if (patient != null && patient.getEmail() != null) {
+                    emailService.sendAppointmentUpdatedByDoctor(
+                            patient.getEmail(),
+                            ap.getDoctor().getName(),
+                            oldTime,
+                            newTime
+                    );
+                }
+            } catch (Exception mailEx) {
+                mailEx.printStackTrace();
+                System.out.println("Email failed, but update persisted: " + mailEx.getMessage());
+            }
+
             return "redirect:/doctor/appointments/" + id;
 
         } catch (Exception e) {
             if (tx != null) tx.rollback();
+            e.printStackTrace();
             model.addAttribute("msg", "Update failed.");
             return "redirect:/doctor/dashboard";
         } finally {
@@ -220,9 +247,28 @@ public class DoctorController {
                 return "redirect:/doctor/dashboard";
             }
 
+            // 1️⃣ Capture details for email BEFORE update
+            Patient patient = ap.getPatient();
+            String doctorName = ap.getDoctor().getName();
+            LocalDateTime apptTime = ap.getAppointmentTime();
+
+            // 2️⃣ Update Status
             ap.setStatus(AppointmentStatus.CANCELLED);
             ss.update(ap);
             tx.commit();
+
+            // 3️⃣ Send Email (Wrapped in try-catch to prevent crashing)
+            if (patient != null && patient.getEmail() != null) {
+                try {
+                    emailService.sendAppointmentCancelledByDoctor(
+                        patient.getEmail(),
+                        doctorName,
+                        apptTime
+                    );
+                } catch (Exception e) {
+                    System.err.println("Email sending failed: " + e.getMessage());
+                }
+            }
 
             return "redirect:/doctor/dashboard";
 
@@ -309,55 +355,172 @@ public class DoctorController {
     }
 
     // ===================================================
+    // 💾 SAVE MEDICAL RECORD (AND EMAIL)
+    // ===================================================
+    // 🔴 THIS WAS MISSING
+    @PostMapping("/records")
+    public String saveMedicalRecord(@RequestParam Integer patientId,
+                                    @RequestParam(required = false) Long appointmentId,
+                                    @RequestParam String diagnosis,
+                                    @RequestParam String prescription,
+                                    @RequestParam String treatment, // ✅ New Field
+                                    @RequestParam(required = false) String notes,
+                                    HttpSession session,
+                                    Model model) {
+
+        Long doctorId = toLong(session.getAttribute("doctorId"));
+        if (doctorId == null) {
+            return "home";
+        }
+
+        Session ss = sf.openSession();
+        Transaction tx = null;
+
+        try {
+            tx = ss.beginTransaction();
+
+            Doctor doctor = ss.get(Doctor.class, doctorId);
+            Patient patient = ss.get(Patient.class, patientId);
+            Appointment appointment = (appointmentId != null) ? ss.get(Appointment.class, appointmentId) : null;
+
+            if (doctor == null || patient == null) {
+                return "redirect:/doctor/dashboard";
+            }
+
+            // Create Record
+            MedicalRecord record = new MedicalRecord();
+            record.setDoctor(doctor);
+            record.setPatient(patient);
+            record.setAppointment(appointment);
+            record.setRecordDate(java.time.LocalDate.now());
+            
+            record.setDiagnosis(diagnosis);
+            record.setPrescription(prescription);
+            record.setTreatment(treatment); // ✅ Saving Treatment
+            record.setNotes(notes);
+
+            ss.persist(record);
+            
+            // Optional: Mark appointment complete
+            if (appointment != null) {
+                appointment.setStatus(AppointmentStatus.COMPLETED);
+                ss.update(appointment);
+            }
+
+            tx.commit();
+
+            // 📧 Send Email
+            try {
+                if (patient.getEmail() != null && !patient.getEmail().isEmpty()) {
+                    emailService.sendMedicalRecordToPatient(
+                        patient.getEmail(),
+                        doctor.getName(),
+                        record
+                    );
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            return "redirect:/doctor/records";
+
+        } catch (Exception e) {
+            if (tx != null) tx.rollback();
+            e.printStackTrace();
+            return "redirect:/doctor/dashboard";
+        } finally {
+            ss.close();
+        }
+    }
+
+    // ===================================================
+    // DELETE MEDICAL RECORD
+    // ===================================================
+    @PostMapping("/records/{id}/delete")
+    public String deleteMedicalRecord(@PathVariable Integer id,
+                                      HttpSession session,
+                                      Model model) {
+
+        Long doctorId = toLong(session.getAttribute("doctorId"));
+        if (doctorId == null) {
+            model.addAttribute("msg", "Please login.");
+            return "home";
+        }
+
+        Session ss = sf.openSession();
+        Transaction tx = null;
+
+        try {
+            tx = ss.beginTransaction();
+
+            MedicalRecord record = ss.get(MedicalRecord.class, id);
+
+            // 🔐 Security check
+            if (record == null ||
+                record.getDoctor() == null ||
+                !doctorId.equals(record.getDoctor().getId())) {
+
+                model.addAttribute("msg", "Access denied.");
+                return "redirect:/doctor/records";
+            }
+
+            ss.delete(record);
+            tx.commit();
+
+            return "redirect:/doctor/records";
+
+        } catch (Exception e) {
+            if (tx != null) tx.rollback();
+            model.addAttribute("msg", "Failed to delete medical record.");
+            return "redirect:/doctor/records";
+        } finally {
+            ss.close();
+        }
+    }
+
+    // ===================================================
+    // EMAIL MEDICAL RECORD (Existing Record)
+    // ===================================================
+    @PostMapping("/records/{id}/email")
+    public String emailMedicalRecord(@PathVariable Integer id,
+                                     HttpSession session,
+                                     Model model) {
+
+        Long doctorId = toLong(session.getAttribute("doctorId"));
+        if (doctorId == null) {
+            return "home";
+        }
+
+        Session ss = sf.openSession();
+        try {
+            MedicalRecord record = ss.get(MedicalRecord.class, id);
+
+            if (record == null || !doctorId.equals(record.getDoctor().getId())) {
+                return "redirect:/doctor/records";
+            }
+
+            Patient patient = record.getPatient();
+            if (patient != null && patient.getEmail() != null && !patient.getEmail().isEmpty()) {
+                emailService.sendMedicalRecordToPatient(
+                    patient.getEmail(),
+                    record.getDoctor().getName(),
+                    record
+                );
+            }
+
+            return "redirect:/doctor/records";
+
+        } finally {
+            ss.close();
+        }
+    }
+
+    // ===================================================
     // LOGOUT
     // ===================================================
     @GetMapping("/logout")
     public String logout(HttpSession session) {
         session.invalidate();
         return "home";
-    }// ===================================================
- // DELETE MEDICAL RECORD
- // ===================================================
- @PostMapping("/records/{id}/delete")
- public String deleteMedicalRecord(@PathVariable Integer id,
-                                   HttpSession session,
-                                   Model model) {
-
-     Long doctorId = toLong(session.getAttribute("doctorId"));
-     if (doctorId == null) {
-         model.addAttribute("msg", "Please login.");
-         return "home";
-     }
-
-     Session ss = sf.openSession();
-     Transaction tx = null;
-
-     try {
-         tx = ss.beginTransaction();
-
-         MedicalRecord record = ss.get(MedicalRecord.class, id);
-
-         // 🔐 Security check
-         if (record == null ||
-             record.getDoctor() == null ||
-             !doctorId.equals(record.getDoctor().getId())) {
-
-             model.addAttribute("msg", "Access denied.");
-             return "redirect:/doctor/records";
-         }
-
-         ss.delete(record);
-         tx.commit();
-
-         return "redirect:/doctor/records";
-
-     } catch (Exception e) {
-         if (tx != null) tx.rollback();
-         model.addAttribute("msg", "Failed to delete medical record.");
-         return "redirect:/doctor/records";
-     } finally {
-         ss.close();
-     }
- }
-
+    }
 }

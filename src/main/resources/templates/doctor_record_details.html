@@ -290,6 +290,7 @@
             border: 1px solid var(--card-border);
             transition: var(--transition);
             cursor: pointer;
+            text-decoration: none; /* Ensure link underline is removed */
         }
 
         .btn-icon:hover {
@@ -340,13 +341,11 @@
     </div>
 
     <div class="container">
-        <!-- Success Notification -->
         <div th:if="${successMsg}" class="alert">
             <i class="fas fa-check-circle"></i>
             <span th:text="${successMsg}">Record updated successfully!</span>
         </div>
 
-        <!-- Header -->
         <header class="page-header">
             <div class="header-content">
                 <h1>
@@ -365,7 +364,6 @@
             </div>
         </header>
 
-        <!-- Search Controls -->
         <div class="controls">
             <div class="search-wrapper">
                 <i class="fas fa-search"></i>
@@ -375,7 +373,6 @@
             </div>
         </div>
 
-        <!-- Records Table Card -->
         <div class="records-card">
             <h3 class="card-title"><i class="fas fa-list-ul" style="color: var(--accent-cyan);"></i> Active Patient Records</h3>
 
@@ -393,7 +390,6 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <!-- Loop through records -->
                         <tr th:each="r, i : ${records}">
                             <td th:text="${i.index + 1}" style="font-weight: 800; color: var(--text-dim);">1</td>
                             <td>
@@ -414,10 +410,16 @@
                             </td>
                             <td>
                                 <div class="actions-cell">
+                                    
                                     <a th:if="${r.appointment != null}" 
                                        th:href="@{/doctor/appointments/{id}(id=${r.appointment.id})}" 
                                        class="btn-icon" title="View Appointment">
                                         <i class="fas fa-calendar-check"></i>
+                                    </a>
+
+                                    <a th:href="@{/doctor/records/edit/{id}(id=${r.id})}" 
+                                       class="btn-icon" title="Edit Record">
+                                        <i class="fas fa-edit"></i>
                                     </a>
                                     
                                     <form th:action="@{/doctor/records/{id}/delete(id=${r.id})}" method="post" 
@@ -430,7 +432,6 @@
                             </td>
                         </tr>
                         
-                        <!-- Empty State -->
                         <tr th:if="${#lists.isEmpty(records)}">
                             <td colspan="7" style="text-align: center; padding: 5rem 0; color: var(--text-dim);">
                                 <i class="fas fa-folder-open" style="font-size: 3rem; opacity: 0.1; display: block; margin-bottom: 1rem;"></i>

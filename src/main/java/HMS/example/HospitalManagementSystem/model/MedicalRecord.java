@@ -37,6 +37,11 @@ public class MedicalRecord {
     @Column(name = "prescription")
     private String prescription;
 
+    // ✅ NEW FIELD ADDED HERE
+    @Lob
+    @Column(name = "treatment")
+    private String treatment;
+
     @Lob
     @Column(name = "notes")
     private String notes;
@@ -85,6 +90,12 @@ public class MedicalRecord {
 
     public String getPrescription() { return prescription; }
     public void setPrescription(String prescription) { this.prescription = prescription; }
+
+    // ✅ NEW GETTER
+    public String getTreatment() { return treatment; }
+    
+    // ✅ NEW SETTER
+    public void setTreatment(String treatment) { this.treatment = treatment; }
 
     public String getNotes() { return notes; }
     public void setNotes(String notes) { this.notes = notes; }

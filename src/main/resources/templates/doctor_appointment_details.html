@@ -9,65 +9,74 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
     <style>
-        /* --- Modern Reset & Variables (Midnight Rose & Fuchsia Theme) --- */
+        /* --- Modern Reset & Soft Midnight Variables --- */
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         :root {
-            --primary-glow: radial-gradient(rgba(244, 114, 182, 0.4), rgba(131, 24, 67, 0));
-            --accent-pink: #f472b6;
-            --accent-fuchsia: #d946ef;
-            --bg-dark: #1a0a12;
-            --card-bg: rgba(30, 10, 20, 0.45);
-            --card-border: rgba(255, 255, 255, 0.06);
-            --text-main: #fdf2f8;
-            --text-dim: #9d174d;
-            --text-muted: #f9a8d4;
-            --transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-            --glass-shadow: 0 8px 32px 0 rgba(131, 24, 67, 0.3);
+            --primary-pink: #f472b6;
+            --primary-fuchsia: #d946ef;
+            --accent-amber: #fbbf24;
+            --accent-blue: #38bdf8;
+            
+            --bg-deep: #0b1121; /* Deep Midnight Blue Base */
+            --card-bg: rgba(15, 23, 42, 0.85); /* Dark Blue-Slate content background */
+            --card-border: rgba(255, 255, 255, 0.08);
+            
+            --text-white: #ffffff;
+            --text-soft: #e2e8f0;
+            --text-dim: #94a3b8;
+            
+            --transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+            --glow-shadow: 0 10px 40px -10px rgba(14, 165, 233, 0.2);
         }
 
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: var(--bg-dark);
+            background-color: var(--bg-deep);
             background-image: 
-                radial-gradient(circle at 0% 0%, rgba(131, 24, 67, 0.3) 0, transparent 40%), 
-                radial-gradient(circle at 100% 100%, rgba(244, 114, 182, 0.15) 0, transparent 40%);
-            color: var(--text-main);
+                radial-gradient(circle at 15% 15%, rgba(14, 165, 233, 0.15) 0, transparent 50%), 
+                radial-gradient(circle at 85% 85%, rgba(131, 24, 67, 0.25) 0, transparent 50%);
+            color: var(--text-white);
             min-height: 100vh;
             overflow-x: hidden;
             line-height: 1.6;
             padding: 2.5rem;
+            position: relative;
         }
 
-        /* --- Animated Mesh Background --- */
+        /* --- Animated Background Elements --- */
         .bg-blobs {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            inset: 0;
             z-index: -1;
-            overflow: hidden;
-            filter: blur(100px);
-            opacity: 0.7;
+            filter: blur(90px);
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .bg-medical-crosses {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            opacity: 0.03;
+            pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 11V7h2v4h4v2h-4v4h-2v-4H7v-2h4z' fill='%23ffffff' fill-rule='evenodd'/%3E%3C/svg%3E");
         }
 
         .blob {
             position: absolute;
             border-radius: 50%;
-            mix-blend-mode: screen;
-            animation: float 25s infinite alternate ease-in-out;
+            animation: float 20s infinite ease-in-out alternate;
         }
 
-        .blob-1 { width: 500px; height: 500px; background: #831843; top: -100px; left: -100px; opacity: 0.2; }
-        .blob-2 { width: 450px; height: 450px; background: var(--accent-pink); bottom: -100px; right: -100px; opacity: 0.1; animation-delay: -5s; }
-        .blob-3 { width: 300px; height: 300px; background: #be185d; top: 40%; left: 30%; opacity: 0.1; animation-duration: 30s; }
+        /* Identical Blob configuration to Dashboard */
+        .blob-1 { width: 500px; height: 500px; background: #0284c7; top: -100px; left: -100px; opacity: 0.3; } 
+        .blob-2 { width: 400px; height: 400px; background: #be185d; bottom: -50px; right: -50px; opacity: 0.3; animation-delay: -5s; }
 
         @keyframes float {
             0% { transform: translate(0, 0) scale(1) rotate(0deg); }
-            33% { transform: translate(50px, -70px) scale(1.1) rotate(10deg); }
-            66% { transform: translate(-30px, 30px) scale(0.9) rotate(-10deg); }
-            100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+            50% { transform: translate(30px, 20px) scale(1.05) rotate(5deg); }
+            100% { transform: translate(-20px, 40px) scale(0.95) rotate(-5deg); }
         }
 
         .container {
@@ -76,10 +85,11 @@
             animation: fadeIn 1s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        /* --- Animations --- */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes heartbeat { 0% { transform: scale(1); } 15% { transform: scale(1.15); } 30% { transform: scale(1); } 45% { transform: scale(1.15); } 60% { transform: scale(1); } 100% { transform: scale(1); } }
+        @keyframes pulse-green { 0% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.4); } 70% { box-shadow: 0 0 0 6px rgba(74, 222, 128, 0); } 100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); } }
+        @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
 
         /* --- Header Styling --- */
         .page-header {
@@ -88,25 +98,15 @@
             align-items: center;
             padding: 1.5rem 2.5rem;
             background: var(--card-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
             border: 1px solid var(--card-border);
             border-radius: 28px;
             margin-bottom: 2rem;
-            box-shadow: var(--glass-shadow);
+            box-shadow: var(--glow-shadow);
             position: relative;
             overflow: hidden;
-        }
-
-        .page-header::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, var(--accent-pink), transparent);
-            opacity: 0.2;
+            animation: fadeIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
 
         .page-header h1 {
@@ -115,38 +115,46 @@
             display: flex;
             align-items: center;
             gap: 1.25rem;
-            background: linear-gradient(to right, #fff, var(--accent-pink));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: var(--text-white);
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
         }
 
         .header-icon {
             width: 48px;
             height: 48px;
-            background: linear-gradient(135deg, rgba(131, 24, 67, 0.4), rgba(244, 114, 182, 0.1));
+            background: linear-gradient(135deg, var(--primary-fuchsia), var(--accent-blue));
             border-radius: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: var(--accent-pink);
-            box-shadow: inset 0 0 10px rgba(244, 114, 182, 0.1);
+            color: white;
+            box-shadow: 0 0 20px rgba(14, 165, 233, 0.3);
+            /* Added float animation to match Dashboard avatar ring */
+            animation: float 6s infinite ease-in-out;
         }
 
-        /* --- Main Details Card --- */
+        /* --- Main Details Card (3D Tilt) --- */
         .detail-card {
             background: var(--card-bg);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
+            backdrop-filter: blur(20px);
             border: 1px solid var(--card-border);
             border-radius: 32px;
             overflow: hidden;
-            transition: var(--transition);
-            box-shadow: var(--glass-shadow);
+            transition: transform 0.1s ease-out, box-shadow 0.3s ease;
+            box-shadow: var(--glow-shadow);
+            transform-style: preserve-3d;
+            perspective: 1000px;
+        }
+
+        .detail-card:hover {
+            box-shadow: 0 15px 50px -10px rgba(14, 165, 233, 0.25);
+            border-color: rgba(56, 189, 248, 0.2);
         }
 
         .card-banner {
-            height: 8px;
-            background: linear-gradient(90deg, var(--accent-fuchsia), var(--accent-pink));
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-blue), var(--primary-pink));
+            opacity: 0.8;
         }
 
         .card-content {
@@ -162,7 +170,7 @@
 
         .appointment-id {
             font-size: 0.95rem;
-            color: var(--text-muted);
+            color: var(--text-dim);
             font-weight: 700;
             letter-spacing: 0.05em;
             text-transform: uppercase;
@@ -181,9 +189,22 @@
             gap: 10px;
         }
 
-        .badge-confirmed { background: rgba(244, 114, 182, 0.1); color: var(--accent-pink); border: 1px solid rgba(244, 114, 182, 0.2); }
-        .badge-pending { background: rgba(251, 191, 36, 0.1); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.2); }
-        .badge-cancelled { background: rgba(239, 68, 68, 0.1); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.2); }
+        .badge-confirmed { 
+            background: rgba(74, 222, 128, 0.15); 
+            color: #4ade80; 
+            border: 1px solid rgba(74, 222, 128, 0.2); 
+            animation: pulse-green 3s infinite;
+        }
+        .badge-pending { 
+            background: rgba(251, 191, 36, 0.1); 
+            color: var(--accent-amber); 
+            border: 1px solid rgba(251, 191, 36, 0.2); 
+        }
+        .badge-cancelled { 
+            background: rgba(248, 113, 113, 0.1); 
+            color: #f87171; 
+            border: 1px solid rgba(248, 113, 113, 0.2); 
+        }
 
         /* --- Info Grid --- */
         .info-grid {
@@ -191,10 +212,11 @@
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 2rem;
             margin-bottom: 3rem;
+            transform: translateZ(20px);
         }
 
         .info-tile {
-            background: rgba(255, 255, 255, 0.02);
+            background: rgba(255, 255, 255, 0.03);
             border: 1px solid var(--card-border);
             border-radius: 22px;
             padding: 1.75rem;
@@ -204,41 +226,48 @@
         }
 
         .info-tile:hover {
-            background: rgba(244, 114, 182, 0.04);
-            border-color: rgba(244, 114, 182, 0.2);
+            background: rgba(255, 255, 255, 0.07);
+            border-color: rgba(56, 189, 248, 0.3);
             transform: translateY(-5px);
         }
 
         .tile-icon {
             width: 48px;
             height: 48px;
-            background: linear-gradient(135deg, rgba(131, 24, 67, 0.4), rgba(244, 114, 182, 0.1));
+            background: rgba(255, 255, 255, 0.1);
             border-radius: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: var(--accent-pink);
+            color: var(--accent-blue);
             font-size: 1.25rem;
             flex-shrink: 0;
+            transition: var(--transition);
+        }
+
+        .info-tile:hover .tile-icon {
+            background: var(--accent-blue);
+            color: #fff;
+            transform: rotate(10deg);
         }
 
         .tile-data .label {
             font-size: 0.7rem;
-            color: var(--text-muted);
+            color: var(--text-dim);
             text-transform: uppercase;
             font-weight: 800;
-            letter-spacing: 0.1em;
+            letter-spacing: 1px;
             margin-bottom: 6px;
         }
 
         .tile-data .value {
             font-size: 1.05rem;
             font-weight: 700;
-            color: var(--text-main);
+            color: var(--text-white);
         }
 
         .highlight-value {
-            color: var(--accent-pink) !important;
+            color: var(--accent-blue) !important;
         }
 
         /* --- Notes Section --- */
@@ -247,6 +276,7 @@
             border-radius: 24px;
             padding: 2rem;
             border: 1px solid var(--card-border);
+            transform: translateZ(10px);
         }
 
         .notes-area .label {
@@ -255,15 +285,15 @@
             gap: 10px;
             font-size: 0.75rem;
             font-weight: 800;
-            color: var(--accent-pink);
+            color: var(--primary-pink);
             text-transform: uppercase;
-            letter-spacing: 0.1em;
+            letter-spacing: 1px;
             margin-bottom: 1rem;
         }
 
         .notes-area .value {
             font-size: 0.95rem;
-            color: var(--text-main);
+            color: var(--text-soft);
             line-height: 1.8;
             opacity: 0.9;
         }
@@ -276,6 +306,7 @@
             justify-content: space-between;
             align-items: center;
             border-top: 1px solid var(--card-border);
+            transform: translateZ(30px);
         }
 
         /* --- Buttons --- */
@@ -292,36 +323,30 @@
             text-decoration: none;
             border: 1px solid transparent;
             font-family: inherit;
-            position: relative;
-            overflow: hidden;
         }
-
-        .btn::before {
-            content: '';
-            position: absolute;
-            top: 0; left: -100%;
-            width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-            transition: 0.5s;
-        }
-
-        .btn:hover::before { left: 100%; }
 
         .btn-primary {
-            background: linear-gradient(135deg, var(--accent-pink), #831843);
-            color: white;
-            box-shadow: 0 8px 20px rgba(131, 24, 67, 0.3);
+            background: var(--text-white);
+            color: #0f172a;
+            box-shadow: 0 4px 15px rgba(255,255,255,0.1);
+            /* Shimmer Effect */
+            background: linear-gradient(110deg, #ffffff 0%, #dbeafe 50%, #ffffff 100%);
+            background-size: 200% 100%;
+            animation: shimmer 5s infinite linear;
         }
 
         .btn-primary:hover {
+            background: var(--accent-blue);
+            color: #fff;
             transform: translateY(-3px);
-            box-shadow: 0 12px 25px rgba(131, 24, 67, 0.5);
+            box-shadow: 0 12px 25px rgba(56, 189, 248, 0.4);
+            animation: none;
         }
 
         .btn-danger {
             background: rgba(239, 68, 68, 0.1);
             color: #f87171;
-            border-color: rgba(239, 68, 68, 0.2);
+            border-color: rgba(239, 68, 68, 0.3);
         }
 
         .btn-danger:hover {
@@ -333,13 +358,13 @@
 
         .btn-secondary {
             background: rgba(255, 255, 255, 0.05);
-            color: var(--text-main);
+            color: var(--text-white);
             border-color: var(--card-border);
         }
 
         .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: var(--accent-pink);
+            background: rgba(56, 189, 248, 0.1);
+            border-color: var(--accent-blue);
             transform: translateY(-3px);
         }
 
@@ -358,23 +383,32 @@
             padding: 1.75rem;
             border-radius: 24px;
             text-align: center;
-            color: var(--text-main);
+            color: var(--text-white);
             text-decoration: none;
             transition: var(--transition);
-            box-shadow: var(--glass-shadow);
+            box-shadow: var(--glow-shadow);
+            transform-style: preserve-3d;
+            perspective: 1000px;
         }
 
         .quick-btn:hover {
-            background: rgba(244, 114, 182, 0.08);
-            border-color: var(--accent-pink);
-            transform: translateY(-8px);
+            background: rgba(255, 255, 255, 0.07);
+            border-color: var(--accent-blue);
+            box-shadow: 0 15px 50px -10px rgba(14, 165, 233, 0.25);
+            transform: translateY(-5px);
         }
 
         .quick-btn i {
             display: block;
             font-size: 1.75rem;
-            color: var(--accent-pink);
+            color: var(--accent-blue);
             margin-bottom: 12px;
+            transition: var(--transition);
+        }
+        
+        .quick-btn:hover i {
+            transform: scale(1.1) rotate(5deg);
+            color: var(--primary-pink);
         }
 
         .quick-btn span {
@@ -395,9 +429,9 @@
 <body>
 
     <div class="bg-blobs">
+        <div class="bg-medical-crosses"></div>
         <div class="blob blob-1"></div>
         <div class="blob blob-2"></div>
-        <div class="blob blob-3"></div>
     </div>
 
     <div class="container">
@@ -415,13 +449,13 @@
         </div>
 
         <!-- Main Card -->
-        <div class="detail-card">
+        <div class="detail-card js-tilt-card">
             <div class="card-banner"></div>
             
             <div class="card-content">
                 <div class="status-section">
                     <div class="appointment-id">
-                        APP-ID: <span th:text="'#' + ${appointment.id}" style="color: var(--text-main);">#12345</span>
+                        APP-ID: <span th:text="'#' + ${appointment.id}" style="color: var(--text-white);">#12345</span>
                     </div>
                     
                     <span th:class="${appointment.status == 'CONFIRMED'} ? 'status-badge badge-confirmed' : 
@@ -464,8 +498,7 @@
                 </div>
             </div>
 
-            <!-- Footer Actions -->
-            <div class="action-footer">
+           <div class="action-footer">
                 <div style="display: flex; gap: 1.25rem;">
                     <a class="btn btn-primary" th:href="@{'/doctor/appointments/' + ${appointment.id} + '/edit'}">
                         <i class="fas fa-edit"></i>
@@ -473,26 +506,25 @@
                     </a>
                 </div>
 
-                <form th:action="@{'/appointments/' + ${appointment.id} + '/cancel'}" method="post">
+                <form th:action="@{'/doctor/appointments/' + ${appointment.id} + '/cancel'}" method="post">
                     <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to cancel this appointment?');">
                         <i class="fas fa-calendar-times"></i>
                         Cancel Appointment
                     </button>
                 </form>
             </div>
-        </div>
 
         <!-- Secondary Quick Actions -->
         <div class="quick-actions">
-            <a href="#" class="quick-btn">
+            <a href="#" class="quick-btn js-tilt-card">
                 <i class="fas fa-print"></i>
                 <span>Print Record</span>
             </a>
-            <a href="#" class="quick-btn">
+            <a href="#" class="quick-btn js-tilt-card">
                 <i class="fas fa-bell"></i>
                 <span>Send Reminder</span>
             </a>
-            <a href="#" class="quick-btn">
+            <a href="#" class="quick-btn js-tilt-card">
                 <i class="fas fa-history"></i>
                 <span>Patient History</span>
             </a>
@@ -501,14 +533,28 @@
     </div>
 
     <script>
-        // Subtle Mouse Glow Effect
-        document.querySelectorAll('.info-tile, .quick-btn, .page-header').forEach(el => {
-            el.addEventListener('mousemove', (e) => {
-                const rect = el.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-                el.style.setProperty('--mouse-x', `${x}px`);
-                el.style.setProperty('--mouse-y', `${y}px`);
+        // 3D Tilt Effect
+        document.addEventListener('DOMContentLoaded', () => {
+            const cards = document.querySelectorAll('.js-tilt-card');
+            
+            cards.forEach(card => {
+                card.addEventListener('mousemove', (e) => {
+                    const rect = card.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+                    
+                    // Multiplier controls the tilt intensity
+                    const rotateX = ((y - centerY) / centerY) * -2; 
+                    const rotateY = ((x - centerX) / centerX) * 2;
+
+                    card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+                });
+
+                card.addEventListener('mouseleave', () => {
+                    card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)';
+                });
             });
         });
     </script>

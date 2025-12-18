@@ -1,0 +1,304 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>New Medical Record | Nexus Health</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* --- Exact Dashboard Variables --- */
+    * { margin: 0; padding: 0; box-sizing: border-box; outline: none; }
+    
+    :root {
+      --primary-pink: #f472b6;
+      --primary-fuchsia: #d946ef;
+      --accent-cyan: #0ea5e9; 
+      --accent-amber: #fbbf24;
+      
+      --bg-deep: #0b1121;
+      --card-bg: rgba(15, 23, 42, 0.75); /* Slightly darker for form readability */
+      --card-border: rgba(255, 255, 255, 0.08);
+      --input-bg: rgba(255, 255, 255, 0.03);
+      
+      --text-white: #ffffff;
+      --text-soft: #e2e8f0;
+      --text-dim: #94a3b8;
+      
+      --transition: all 0.3s ease;
+      --glow-shadow: 0 10px 40px -10px rgba(14, 165, 233, 0.2);
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--bg-deep);
+      color: var(--text-white);
+      min-height: 100vh;
+      overflow-x: hidden;
+      padding: 2rem;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(14, 165, 233, 0.15) 0, transparent 50%), 
+        radial-gradient(circle at 85% 85%, rgba(131, 24, 67, 0.25) 0, transparent 50%);
+    }
+
+    /* --- Floating Orbs (Same as Dashboard) --- */
+    .orb {
+        position: fixed;
+        border-radius: 50%;
+        filter: blur(100px);
+        opacity: 0.4;
+        z-index: -1;
+        pointer-events: none;
+        animation: floatOrb 20s infinite alternate ease-in-out;
+    }
+    .orb-1 { width: 600px; height: 600px; background: var(--accent-cyan); top: -200px; left: -150px; }
+    .orb-2 { width: 500px; height: 500px; background: var(--primary-fuchsia); bottom: -150px; right: -100px; animation-delay: -5s; }
+
+    @keyframes floatOrb {
+        0% { transform: translate(0, 0) scale(1); }
+        100% { transform: translate(30px, 50px) scale(1.1); }
+    }
+    
+    @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+    .container { 
+        width: 100%; 
+        max-width: 850px; 
+        animation: slideUp 0.6s ease-out; 
+    }
+
+    /* --- Form Card Styling --- */
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--card-border);
+      border-radius: 30px;
+      padding: 3rem;
+      box-shadow: var(--glow-shadow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Top Gradient Line */
+    .card::before {
+      content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px;
+      background: linear-gradient(90deg, transparent, #38bdf8, var(--primary-pink), transparent);
+      opacity: 0.8;
+    }
+
+    .header {
+        margin-bottom: 2.5rem;
+        border-bottom: 1px solid var(--card-border);
+        padding-bottom: 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    .header h2 { font-size: 1.5rem; font-weight: 800; display: flex; align-items: center; gap: 12px; }
+    .header i { color: var(--accent-cyan); }
+
+    .meta-badges { display: flex; gap: 10px; }
+    
+    .badge {
+        padding: 6px 14px;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .badge-patient { background: rgba(14, 165, 233, 0.15); color: #38bdf8; border: 1px solid rgba(14, 165, 233, 0.2); }
+    .badge-apt { background: rgba(251, 191, 36, 0.15); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.2); }
+
+    /* Inputs */
+    .form-group { margin-bottom: 1.5rem; }
+    
+    label {
+        display: block; margin-bottom: 0.75rem; color: var(--text-dim);
+        font-size: 0.75rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+    }
+
+    .input-box, textarea, select {
+        width: 100%;
+        background: var(--input-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 16px;
+        padding: 1rem 1.25rem;
+        color: var(--text-white);
+        font-family: inherit;
+        font-size: 0.95rem;
+        transition: var(--transition);
+        resize: vertical;
+    }
+
+    .input-box:focus, textarea:focus, select:focus {
+        border-color: var(--accent-cyan);
+        background: rgba(255, 255, 255, 0.05);
+        box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.1);
+    }
+    
+    /* File Upload Area */
+    .file-upload-wrapper {
+        border: 2px dashed var(--card-border);
+        border-radius: 16px;
+        padding: 2.5rem;
+        text-align: center;
+        transition: var(--transition);
+        background: rgba(0,0,0,0.2);
+        cursor: pointer;
+    }
+    .file-upload-wrapper:hover { border-color: var(--accent-cyan); background: rgba(14, 165, 233, 0.05); }
+
+    input[type="file"] { display: none; }
+    .file-label {
+        color: var(--accent-cyan); font-weight: 600; display: flex; flex-direction: column; align-items: center; gap: 10px;
+    }
+
+    /* Buttons */
+    .btn-group {
+        display: grid; grid-template-columns: 1fr 2fr; gap: 1.5rem; margin-top: 2.5rem;
+    }
+
+    .btn {
+        padding: 1rem; border-radius: 16px; font-weight: 700; cursor: pointer; text-align: center;
+        transition: var(--transition); text-decoration: none; border: none; font-size: 1rem;
+        display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    }
+
+    .btn-primary {
+        background: var(--text-white); color: #0f172a;
+        box-shadow: 0 4px 15px rgba(255,255,255,0.1);
+    }
+    .btn-primary:hover {
+        background: var(--accent-cyan); color: #fff;
+        box-shadow: 0 8px 25px rgba(14, 165, 233, 0.4); transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+        background: transparent; color: var(--text-dim); border: 1px solid var(--card-border);
+    }
+    .btn-secondary:hover {
+        border-color: var(--text-white); color: var(--text-white); background: rgba(255,255,255,0.05);
+    }
+
+    /* Error Banner */
+    .error-banner {
+        background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2);
+        color: #f87171; padding: 1rem; border-radius: 16px; margin-bottom: 2rem;
+        display: flex; align-items: center; gap: 10px; font-weight: 600;
+    }
+    
+    option { background: #0b1121; color: #fff; }
+
+  </style>
+</head>
+<body>
+
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <div class="container">
+        
+        <div th:if="${msg}" class="error-banner">
+            <i class="fas fa-exclamation-triangle"></i> <span th:text="${msg}">Error message</span>
+        </div>
+
+        <div class="card">
+            <div class="header">
+                <div>
+                    <h2><i class="fas fa-file-medical-alt"></i> New Medical Record</h2>
+                    <p style="color:var(--text-dim); font-size:0.9rem; margin-top:5px;">Create a diagnosis and treatment plan</p>
+                </div>
+                
+                <div class="meta-badges">
+                    <div class="badge badge-patient">
+                        <i class="fas fa-user-injured"></i>
+                        <span th:text="${patient != null ? patient.name : 'Select Patient Below'}">Patient Name</span>
+                    </div>
+
+                    <div th:if="${appointmentId != null}" class="badge badge-apt">
+                        <i class="fas fa-calendar-check"></i>
+                        <span th:text="'Apt #' + ${appointmentId}">Apt #102</span>
+                    </div>
+                </div>
+            </div>
+
+            <form th:action="@{/doctor/records}" method="post" enctype="multipart/form-data">
+                
+                <input type="hidden" name="doctorId" th:value="${doctorId}" />
+                <input type="hidden" name="appointmentId" th:if="${appointmentId != null}" th:value="${appointmentId}" />
+                
+                <input type="hidden" name="patientId" th:if="${patient != null}" th:value="${patient.id}" />
+
+                <div class="form-group" th:if="${patient == null}">
+                    <label>Patient ID</label>
+                    <input type="number" name="patientId" class="input-box" required placeholder="Enter Patient ID" />
+                </div>
+
+                <div class="form-group">
+                    <label>Diagnosis</label>
+                    <textarea name="diagnosis" class="input-box" required placeholder="Primary diagnosis and clinical findings..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Prescription</label>
+                    <textarea name="prescription" class="input-box" required placeholder="Medication, dosage, and frequency..." style="min-height:80px;"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Clinical Notes / Instructions</label>
+                    <textarea name="notes" class="input-box" style="min-height: 120px;" placeholder="Additional instructions for the patient..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Attachments (Reports / X-Rays)</label>
+                    <div class="file-upload-wrapper" onclick="document.getElementById('fileInput').click()">
+                        <input type="file" id="fileInput" name="files" multiple onchange="updateFileList()">
+                        <div class="file-label">
+                            <i class="fas fa-cloud-upload-alt" style="font-size: 2rem; margin-bottom:8px;"></i>
+                            <span>Drop files here or click to upload</span>
+                            <span id="fileList" style="font-size: 0.8rem; color: var(--text-dim); font-weight: 400; margin-top:5px;">Supports PDF, JPG, PNG</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="btn-group">
+                    <a th:href="@{/doctor/dashboard}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save Record
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function updateFileList() {
+            const input = document.getElementById('fileInput');
+            const list = document.getElementById('fileList');
+            if (input.files.length > 0) {
+                list.innerText = input.files.length + " file(s) ready for upload";
+                list.style.color = "#0ea5e9";
+                list.style.fontWeight = "700";
+            } else {
+                list.innerText = "Supports PDF, JPG, PNG";
+                list.style.color = "var(--text-dim)";
+                list.style.fontWeight = "400";
+            }
+        }
+    </script>
+
+</body>
+</html>
