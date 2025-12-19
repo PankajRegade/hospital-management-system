@@ -1,149 +1,350 @@
-<!doctype html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Hospital Services - MediCare</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        /* your original CSS (unchanged) */
-        *{box-sizing:border-box;margin:0;padding:0}
-        html,body{font-family:'Poppins',sans-serif;color:#1e293b;overflow-x:hidden;}
-        body{background:#0a0e27;position:relative;min-height:100vh;}
-        body::before{content:'';position:fixed;top:0;left:0;width:100%;height:100%;background:radial-gradient(circle at 20% 30%, rgba(139,92,246,0.2), transparent 40%),radial-gradient(circle at 80% 70%, rgba(59,130,246,0.2), transparent 40%),radial-gradient(circle at 50% 50%, rgba(16,185,129,0.1), transparent 50%);animation:drift 25s ease-in-out infinite;z-index:0;}
-        @keyframes drift{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(40px,-40px) scale(1.05)}66%{transform:translate(-30px,30px) scale(0.95)}}
-        body::after{content:'';position:fixed;top:0;left:0;width:100%;height:100%;background-image:repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(255,255,255,0.02) 40px, rgba(255,255,255,0.02) 42px),repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(255,255,255,0.02) 40px, rgba(255,255,255,0.02) 42px);pointer-events:none;z-index:0;}
-        .orb{position:fixed;border-radius:50%;filter:blur(80px);opacity:0.4;pointer-events:none;z-index:0}
-        .orb-1{width:400px;height:400px;background:linear-gradient(135deg,#667eea,#764ba2);top:-100px;right:-100px;animation:float1 20s ease-in-out infinite;}
-        .orb-2{width:350px;height:350px;background:linear-gradient(135deg,#f093fb,#f5576c);bottom:-80px;left:-80px;animation:float2 25s ease-in-out infinite;}
-        @keyframes float1{0%,100%{transform:translate(0,0)}50%{transform:translate(-60px,60px)}}
-        @keyframes float2{0%,100%{transform:translate(0,0)}50%{transform:translate(60px,-60px)}}
-        .container{max-width:1400px;margin:0 auto;padding:80px 20px;position:relative;z-index:10;}
-        .header{text-align:center;margin-bottom:70px;animation:fadeInDown 1s ease-out;}
-        .header-badge{display:inline-block;padding:10px 24px;background:rgba(102,126,234,0.1);border:2px solid rgba(102,126,234,0.3);border-radius:50px;color:#a5b4fc;font-size:14px;font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-bottom:24px;animation:pulse 3s ease-in-out infinite;}
-        @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
-        .header h1{font-size:clamp(36px,5vw,56px);font-weight:800;background:linear-gradient(135deg,#667eea 0%,#764ba2 50%,#f093fb 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:20px;letter-spacing:-1px;}
-        .header p{font-size:18px;color:rgba(255,255,255,0.7);max-width:600px;margin:0 auto;line-height:1.6;}
-        .services-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(350px,1fr));gap:32px;animation:fadeInUp 1s ease-out 0.3s backwards;}
-        .service-card{background:rgba(255,255,255,0.05);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.1);border-radius:24px;overflow:hidden;transition:all 0.5s cubic-bezier(0.175,0.885,0.32,1.275);position:relative;}
-        .service-card::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(135deg,rgba(102,126,234,0.1),rgba(118,75,162,0.1));opacity:0;transition:opacity 0.5s ease;z-index:1;pointer-events:none;}
-        .service-card:hover{transform:translateY(-16px) scale(1.02);border-color:rgba(102,126,234,0.5);box-shadow:0 30px 60px rgba(102,126,234,0.4);}
-        .service-card:hover::before{opacity:1;}
-        .service-image{height:280px;background:#1a1a2e;position:relative;overflow:hidden;}
-        .service-image img{width:100%;height:100%;object-fit:cover;transition:transform 0.7s ease;}
-        .service-card:hover .service-image img{transform:scale(1.15);}
-        .service-image::after{content:'';position:absolute;bottom:0;left:0;right:0;height:60%;background:linear-gradient(0deg,rgba(10,14,39,0.9) 0%,transparent 100%);z-index:1;}
-        .service-badge{position:absolute;top:20px;right:20px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:10px 18px;border-radius:50px;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;z-index:2;box-shadow:0 8px 20px rgba(102,126,234,0.4);}
-        .service-content{padding:32px;position:relative;z-index:2;}
-        .service-icon{width:60px;height:60px;background:linear-gradient(135deg,#667eea,#764ba2);border-radius:16px;display:flex;align-items:center;justify-content:center;margin-bottom:20px;box-shadow:0 10px 25px rgba(102,126,234,0.3);}
-        .service-icon i{font-size:28px;color:#fff;}
-        .service-content h2{font-size:24px;font-weight:700;color:#fff;margin-bottom:16px;letter-spacing:-0.5px;}
-        .service-content p{font-size:15px;color:rgba(255,255,255,0.7);line-height:1.7;margin-bottom:24px;}
-        .service-features{display:flex;flex-direction:column;gap:12px;margin-bottom:24px;}
-        .feature-item{display:flex;align-items:center;gap:10px;font-size:14px;color:rgba(255,255,255,0.8);}
-        .feature-item i{color:#10b981;font-size:16px;}
-        .service-btn{width:100%;padding:14px 24px;background:rgba(255,255,255,0.1);border:2px solid rgba(255,255,255,0.2);border-radius:12px;color:#fff;font-weight:600;font-size:15px;cursor:pointer;transition:all 0.3s ease;display:flex;align-items:center;justify-content:center;gap:10px;text-decoration:none;}
-        .service-btn:hover{background:linear-gradient(135deg,#667eea,#764ba2);border-color:transparent;transform:translateY(-2px);box-shadow:0 10px 25px rgba(102,126,234,0.4);}
-        @keyframes fadeInDown{from{opacity:0;transform:translateY(-30px)}to{opacity:1;transform:translateY(0)}}
-        @keyframes fadeInUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
-        @media (max-width:768px){.services-grid{grid-template-columns:1fr;gap:24px}.container{padding:60px 20px}.header{margin-bottom:50px}.service-image{height:220px}}
-        @media (max-width:480px){.service-content{padding:24px}.header h1{font-size:32px}}
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AXES Hospital - Our Services</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* --- SHARED CSS FROM HOME PAGE --- */
+    *{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth;}
+    body{
+      font-family:'Poppins',sans-serif;
+      color:#1e293b;
+      overflow-x:hidden;
+      background:#0f172a;
+    }
+
+    /* Animated Background */
+    body::before{
+      content:'';
+      position:fixed;top:0;left:0;width:100%;height:100%;
+      background:radial-gradient(circle at 20% 30%, rgba(16,185,129,0.15), transparent 40%),
+                 radial-gradient(circle at 80% 70%, rgba(59,130,246,0.15), transparent 40%),
+                 radial-gradient(circle at 50% 50%, rgba(14,165,233,0.08), transparent 50%);
+      animation:drift 25s ease-in-out infinite;z-index:0;
+    }
+    @keyframes drift{
+      0%,100%{transform:translate(0,0) scale(1)}
+      33%{transform:translate(40px,-40px) scale(1.05)}
+      66%{transform:translate(-30px,30px) scale(0.95)}
+    }
+    body::after{
+      content:'';position:fixed;top:0;left:0;width:100%;height:100%;
+      background-image:repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(255,255,255,0.02) 40px, rgba(255,255,255,0.02) 42px),
+                       repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(255,255,255,0.02) 40px, rgba(255,255,255,0.02) 42px);
+      pointer-events:none;z-index:0;
+    }
+
+    /* Navbar */
+    .navbar{
+      position:fixed;top:0;left:0;right:0;z-index:100;
+      display:flex;align-items:center;justify-content:space-between;
+      padding:20px 40px;
+      background:rgba(15,23,42,0.9);
+      backdrop-filter:blur(20px);
+      border-bottom:1px solid rgba(255,255,255,0.1);
+      transition:all 0.3s ease;
+    }
+    .navbar.scrolled{padding:15px 40px;background:rgba(15,23,42,0.95);}
+    
+    .logo{
+      font-size:24px;font-weight:800;
+      background:linear-gradient(135deg,#10b981,#0ea5e9);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+      display:flex;align-items:center;gap:10px;
+    }
+    .logo i{color:#10b981;-webkit-text-fill-color:#10b981;}
+    
+    .nav-links{display:flex;align-items:center;gap:8px;}
+    .nav-links a{
+      color:rgba(255,255,255,0.85);text-decoration:none;
+      font-size:15px;font-weight:500;padding:10px 18px;border-radius:10px;
+      transition:all 0.3s ease;
+    }
+    .nav-links a:hover{background:rgba(255,255,255,0.1);color:#fff;}
+    .nav-cta{
+      background:linear-gradient(135deg,#10b981,#0ea5e9);color:#fff !important;
+      padding:10px 24px !important;border-radius:10px;font-weight:600;margin-left:8px;
+    }
+    .nav-cta:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(16,185,129,0.3);}
+
+    /* Header */
+    .page-header{
+      padding:140px 20px 60px;text-align:center;position:relative;z-index:10;
+    }
+    .section-title{
+      font-size:48px;font-weight:800;margin-bottom:16px;
+      background:linear-gradient(135deg,#fff,#cbd5e1);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+    }
+    .section-subtitle{
+      font-size:18px;color:rgba(255,255,255,0.7);
+      max-width:700px;margin:0 auto;line-height:1.6;
+    }
+
+    /* Container & Grid */
+    .container{
+      max-width:1200px;margin:0 auto;padding:0 20px 80px;position:relative;z-index:10;
+    }
+    .services-grid{
+      display:grid;grid-template-columns:repeat(auto-fit,minmax(350px,1fr));gap:30px;
+    }
+
+    /* Cards */
+    .service-card{
+      background:rgba(255,255,255,0.05);
+      backdrop-filter:blur(20px);
+      border:1px solid rgba(255,255,255,0.1);
+      border-radius:24px;overflow:hidden;
+      transition:all 0.4s ease;
+      display:flex;flex-direction:column;
+    }
+    .service-card:hover{
+      transform:translateY(-10px);
+      background:rgba(255,255,255,0.08);
+      border-color:rgba(16,185,129,0.3);
+      box-shadow:0 20px 40px rgba(0,0,0,0.3);
+    }
+
+    .service-image-container{
+        height:240px;
+        position:relative;
+        overflow:hidden;
+        background: #1e293b; /* Fallback color if image loads slowly */
+    }
+    .service-image-container img{
+      width:100%;height:100%;object-fit:cover;transition:transform 0.5s ease;
+    }
+    .service-card:hover .service-image-container img{transform:scale(1.1);}
+    
+    .service-badge{
+      position:absolute;top:20px;right:20px;
+      background:rgba(15,23,42,0.85);backdrop-filter:blur(4px);
+      color:#10b981;padding:6px 14px;border-radius:20px;
+      font-size:12px;font-weight:600;border:1px solid rgba(16,185,129,0.3);
+    }
+
+    .service-content{padding:30px;flex:1;display:flex;flex-direction:column;}
+    
+    .service-icon{
+      width:50px;height:50px;margin-bottom:20px;
+      background:linear-gradient(135deg,#10b981,#0ea5e9);
+      border-radius:14px;display:flex;align-items:center;justify-content:center;
+      font-size:20px;color:#fff;
+    }
+    .service-content h2{font-size:24px;font-weight:700;color:#fff;margin-bottom:12px;}
+    .service-content p{
+      font-size:15px;color:rgba(255,255,255,0.7);line-height:1.6;margin-bottom:24px;
+    }
+
+    .feature-list{margin-bottom:24px;display:flex;flex-direction:column;gap:10px;}
+    .feature-item{
+      display:flex;align-items:center;gap:10px;
+      font-size:14px;color:rgba(255,255,255,0.8);
+    }
+    .feature-item i{color:#10b981;}
+
+    .service-btn{
+      margin-top:auto;padding:14px;
+      background:rgba(255,255,255,0.1);color:#fff;
+      text-align:center;border-radius:12px;text-decoration:none;
+      font-weight:600;font-size:15px;border:1px solid rgba(255,255,255,0.1);
+      transition:all 0.3s ease;display:flex;align-items:center;justify-content:center;gap:8px;
+    }
+    .service-btn:hover{
+      background:linear-gradient(135deg,#10b981,#0ea5e9);
+      border-color:transparent;transform:translateY(-2px);
+    }
+
+    /* Footer */
+    .footer{
+      background:rgba(15,23,42,0.95);border-top:1px solid rgba(255,255,255,0.1);
+      padding:60px 20px 30px;position:relative;z-index:10;
+    }
+    .footer-content{
+      max-width:1200px;margin:0 auto;display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:40px;margin-bottom:40px;
+    }
+    .footer-section h3{font-size:20px;font-weight:700;color:#fff;margin-bottom:20px;}
+    .footer-section p,.footer-links a{
+      font-size:14px;color:rgba(255,255,255,0.6);line-height:1.8;
+      text-decoration:none;transition:color 0.3s ease;
+    }
+    .footer-links{list-style:none;}
+    .footer-links li{margin-bottom:12px;}
+    .footer-links a:hover{color:#10b981;}
+    .social-links{display:flex;gap:12px;margin-top:16px;}
+    .social-links a{
+      width:40px;height:40px;background:rgba(255,255,255,0.1);
+      border-radius:10px;display:flex;align-items:center;justify-content:center;
+      color:rgba(255,255,255,0.6);transition:all 0.3s ease;
+    }
+    .social-links a:hover{background:linear-gradient(135deg,#10b981,#0ea5e9);color:#fff;}
+    .footer-bottom{
+      max-width:1200px;margin:0 auto;padding-top:30px;
+      border-top:1px solid rgba(255,255,255,0.1);text-align:center;
+      color:rgba(255,255,255,0.5);font-size:14px;
+    }
+
+    @media (max-width:968px){.navbar{padding:16px 20px;}.nav-links{display:none;}}
+  </style>
 </head>
-
 <body>
-    <div class="orb orb-1"></div>
-    <div class="orb orb-2"></div>
 
-    <div class="container">
-        <div class="header">
-            <div class="header-badge">
-                <i class="fas fa-heart-pulse"></i> Our Services
-            </div>
-            <h1>Comprehensive Healthcare Services</h1>
-            <p>Providing world-class medical care with advanced technology and compassionate professionals dedicated to your wellbeing</p>
-        </div>
-
-        <div class="services-grid">
-            <!-- Emergency Services -->
-            <div class="service-card">
-                <div class="service-image">
-                    <!-- use th:src so that static path resolution works -->
-                    <img th:src="@{/images/emergency.jpg}" src="/images/emergency.jpg" alt="Emergency Services">
-                    <div class="service-badge">24/7 Available</div>
-                </div>
-                <div class="service-content">
-                    <div class="service-icon"><i class="fas fa-ambulance"></i></div>
-                    <h2>Emergency Services</h2>
-                    <p>Swift response and critical care available around the clock. Our emergency department is equipped with state-of-the-art facilities and experienced medical professionals.</p>
-                    <div class="service-features">
-                        <div class="feature-item"><i class="fas fa-check-circle"></i><span>24/7 Emergency Care</span></div>
-                        <div class="feature-item"><i class="fas fa-check-circle"></i><span>Advanced Life Support</span></div>
-                        <div class="feature-item"><i class="fas fa-check-circle"></i><span>Trauma Specialists</span></div>
-                    </div>
-                    <a th:href="@{/emergency}" class="service-btn">
-                        <i class="fas fa-arrow-right"></i>
-                        Learn More
-                    </a>
-                </div>
-            </div>
-
-            <!-- Hospital Beds -->
-            <div class="service-card">
-                <div class="service-image">
-                    <img th:src="@{/images/beds.jpg}" src="/images/beds.jpg" alt="Hospital Beds">
-                    <div class="service-badge">Premium Care</div>
-                </div>
-                <div class="service-content">
-                    <div class="service-icon"><i class="fas fa-bed"></i></div>
-                    <h2>Hospital Beds & Rooms</h2>
-                    <p>Comfortable and well-equipped patient rooms with modern amenities. We provide private, semi-private, and ICU beds for optimal patient care and recovery.</p>
-                    <div class="service-features">
-                        <div class="feature-item"><i class="fas fa-check-circle"></i><span>Private & Shared Rooms</span></div>
-                        <div class="feature-item"><i class="fas fa-check-circle"></i><span>ICU & Critical Care Units</span></div>
-                        <div class="feature-item"><i class="fas fa-check-circle"></i><span>Modern Patient Amenities</span></div>
-                    </div>
-                    <a th:href="@{/doctors}" class="service-btn">
-                        <i class="fas fa-arrow-right"></i>
-                        View Facilities
-                    </a>
-                </div>
-            </div>
-
-            <!-- Telemedicine -->
-            <div class="service-card">
-                <div class="service-image">
-                    <img th:src="@{/images/tele.jpg}" src="/images/tele.jpg" alt="Telemedicine">
-                    <div class="service-badge">Virtual Care</div>
-                </div>
-                <div class="service-content">
-                    <div class="service-icon"><i class="fas fa-video"></i></div>
-                    <h2>Telemedicine Services</h2>
-                    <p>Virtual consultations and remote healthcare options for your convenience. Connect with our doctors from the comfort of your home through secure video calls.</p>
-                    <div class="service-features">
-                        <div class="feature-item"><i class="fas fa-check-circle"></i><span>Video Consultations</span></div>
-                        <div class="feature-item"><i class="fas fa-check-circle"></i><span>Remote Monitoring</span></div>
-                        <div class="feature-item"><i class="fas fa-check-circle"></i><span>Digital Prescriptions</span></div>
-                    </div>
-                    <a th:href="@{/contactPage}" class="service-btn">
-                        <i class="fas fa-arrow-right"></i>
-                        Book Consultation
-                    </a>
-                </div>
-            </div>
-        </div>
+  <nav class="navbar">
+    <div class="logo">
+      <i class="fas fa-hospital"></i>
+      AXES Hospital
     </div>
+    <div class="nav-links">
+      <a th:href="@{/home}">Home</a>
+      <a th:href="@{/services}" style="color:#fff; background:rgba(255,255,255,0.1);">Services</a>
+      <a th:href="@{/doctors}">Doctors</a>
+      <a href="#about">About</a>
+      <a th:href="@{/contactPage}">Contact</a>
+      <a th:href="@{/login}" class="nav-cta">Login</a>
+    </div>
+  </nav>
 
-    <script th:inline="javascript">
-        /*<![CDATA[*/
-        // Add smooth hover effects (keeps same behavior)
-        const cards = document.querySelectorAll('.service-card');
-        cards.forEach(card => {
-            card.addEventListener('mouseenter', function() { this.style.zIndex = '20'; });
-            card.addEventListener('mouseleave', function() { this.style.zIndex = '10'; });
-        });
-        /*]]>*/
-    </script>
+  <header class="page-header">
+    <div class="section-title">World Class Facilities</div>
+    <p class="section-subtitle">Combining advanced medical technology with a healing environment to ensure the best outcomes for our patients.</p>
+  </header>
+
+  <div class="container">
+    <div class="services-grid">
+      
+      <div class="service-card">
+        <div class="service-image-container">
+          <img src=https://static.vecteezy.com/system/resources/thumbnails/029/338/731/small/ambulance-car-illustration-emergency-medical-service-vehicle-isolated-on-white-background-vector.jpg>
+          <div class="service-badge">24/7 Available</div>
+        </div>
+        <div class="service-content">
+          <div class="service-icon"><i class="fas fa-ambulance"></i></div>
+          <h2>Emergency Services</h2>
+          <p>Rapid response teams and critical care available around the clock. Equipped with advanced life support systems.</p>
+          <div class="feature-list">
+            <div class="feature-item"><i class="fas fa-check-circle"></i><span>Trauma Center</span></div>
+            <div class="feature-item"><i class="fas fa-check-circle"></i><span>24/7 Ambulance</span></div>
+            <div class="feature-item"><i class="fas fa-check-circle"></i><span>ICU Transport</span></div>
+          </div>
+          <a th:href="@{/emergency}" class="service-btn">
+            Learn More <i class="fas fa-arrow-right"></i>
+          </a>
+        </div>
+      </div>
+
+      <div class="service-card">
+        <div class="service-image-container">
+          <img src=https://www.verywellhealth.com/thmb/bfMhqkrit5viXCYbgFysKNONIxA=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/GettyImages-513438585-570e82c53df78c7d9e53871f.jpg>
+          <div class="service-badge">Comfort Care</div>
+        </div>
+        <div class="service-content">
+          <div class="service-icon"><i class="fas fa-bed"></i></div>
+          <h2>Inpatient Facilities</h2>
+          <p>Modern patient rooms designed for comfort and recovery. We offer private suites, semi-private rooms, and specialized wards.</p>
+          <div class="feature-list">
+            <div class="feature-item"><i class="fas fa-check-circle"></i><span>Private & ICU Beds</span></div>
+            <div class="feature-item"><i class="fas fa-check-circle"></i><span>Sanitized Wards</span></div>
+            <div class="feature-item"><i class="fas fa-check-circle"></i><span>24hr Nursing</span></div>
+          </div>
+          <a th:href="@{/doctors}" class="service-btn">
+            View Rooms <i class="fas fa-arrow-right"></i>
+          </a>
+        </div>
+      </div>
+
+      <div class="service-card">
+        <div class="service-image-container">
+          <img src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=800&q=80" alt="Specialist Doctor">
+          <div class="service-badge">Top Experts</div>
+        </div>
+        <div class="service-content">
+          <div class="service-icon"><i class="fas fa-user-md"></i></div>
+          <h2>Specialist Consultation</h2>
+          <p>Access our team of board-certified specialists across various disciplines including Cardiology, Neurology, and Oncology.</p>
+          <div class="feature-list">
+            <div class="feature-item"><i class="fas fa-check-circle"></i><span>Expert Diagnosis</span></div>
+            <div class="feature-item"><i class="fas fa-check-circle"></i><span>Multi-disciplinary</span></div>
+            <div class="feature-item"><i class="fas fa-check-circle"></i><span>Second Opinions</span></div>
+          </div>
+          <a th:href="@{/doctors}" class="service-btn">
+            Find a Doctor <i class="fas fa-arrow-right"></i>
+          </a>
+        </div>
+      </div>
+
+      <div class="service-card">
+        <div class="service-image-container">
+          <img src="https://images.unsplash.com/photo-1579154204601-01588f351e67?w=800&q=80" alt="Diagnostics">
+          <div class="service-badge">High Tech</div>
+        </div>
+        <div class="service-content">
+          <div class="service-icon"><i class="fas fa-microscope"></i></div>
+          <h2>Diagnostics & Labs</h2>
+          <p>State-of-the-art laboratory and imaging services ensuring accurate and timely diagnosis for effective treatment.</p>
+          <div class="feature-list">
+            <div class="feature-item"><i class="fas fa-check-circle"></i><span>MRI & CT Scan</span></div>
+            <div class="feature-item"><i class="fas fa-check-circle"></i><span>Pathology Lab</span></div>
+            <div class="feature-item"><i class="fas fa-check-circle"></i><span>Digital X-Ray</span></div>
+          </div>
+          <a th:href="@{/contactPage}" class="service-btn">
+            Book Test <i class="fas fa-arrow-right"></i>
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>AXES Hospital</h3>
+        <p>Providing exceptional healthcare services with compassion and excellence for over 20 years.</p>
+        <div class="social-links">
+          <a href="#"><i class="fab fa-facebook-f"></i></a>
+          <a href="#"><i class="fab fa-twitter"></i></a>
+          <a href="#"><i class="fab fa-instagram"></i></a>
+          <a href="#"><i class="fab fa-linkedin-in"></i></a>
+        </div>
+      </div>
+      <div class="footer-section">
+        <h3>Quick Links</h3>
+        <ul class="footer-links">
+          <li><a th:href="@{/home}"><i class="fas fa-chevron-right"></i> Home</a></li>
+          <li><a th:href="@{/services}"><i class="fas fa-chevron-right"></i> Services</a></li>
+          <li><a th:href="@{/doctors}"><i class="fas fa-chevron-right"></i> Doctors</a></li>
+          <li><a th:href="@{/login}"><i class="fas fa-chevron-right"></i> Portal</a></li>
+        </ul>
+      </div>
+      <div class="footer-section">
+        <h3>Contact Info</h3>
+        <ul class="footer-links">
+          <li><a href="tel:+91888812345"><i class="fas fa-phone"></i> +91 88881 2345</a></li>
+          <li><a href="mailto:info@axeshospital.com"><i class="fas fa-envelope"></i> info@axeshospital.com</a></li>
+          <li><a th:href="@{/contactPage}"><i class="fas fa-file-contract"></i> Get in Touch</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2024 AXES Hospital. All rights reserved. | Designed with <i class="fas fa-heart" style="color:#10b981"></i></p>
+    </div>
+  </footer>
+
+  <script>
+    // Navbar scroll effect
+    window.addEventListener('scroll', () => {
+      const navbar = document.querySelector('.navbar');
+      if(window.scrollY > 50){
+        navbar.classList.add('scrolled');
+      }else{
+        navbar.classList.remove('scrolled');
+      }
+    });
+  </script>
 </body>
 </html>

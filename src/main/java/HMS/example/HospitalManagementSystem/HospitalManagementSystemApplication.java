@@ -9,6 +9,6 @@ public class HospitalManagementSystemApplication {
     
     System.out.println("Hello");
     }
-    
+
 }
 

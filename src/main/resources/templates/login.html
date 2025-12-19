@@ -22,7 +22,7 @@
       background:#0f172a;
     }
 
-    /* Animated background (same as home) */
+    /* Animated background */
     body::before{
       content:'';
       position:fixed;
@@ -59,7 +59,7 @@
       z-index:0;
     }
 
-    /* Navbar (same as home) */
+    /* Navbar */
     .navbar{
       position:fixed;
       top:0;
@@ -441,7 +441,6 @@
 </head>
 <body>
 
-  <!-- Navbar -->
   <nav class="navbar">
     <div class="logo">
       <i class="fas fa-hospital"></i>
@@ -450,21 +449,16 @@
     <div class="nav-links">
       <a th:href="@{/home}">Home</a>
      
-   
-      <div class="text-center mt-3">
-    <a href="/contactPage" class="btn btn-link">
+      <a th:href="@{/contactPage}">
         📞 Get in Touch
-    </a>
-</div>
+      </a>
 
       <a th:href="@{/SignupPage}" class="nav-cta">Sign Up</a>
     </div>
   </nav>
 
-  <!-- Login Section -->
   <section class="auth-section">
     <div class="auth-container">
-      <!-- Left: info / marketing -->
       <div class="auth-left">
         <div class="auth-tag">
           <i class="fas fa-shield-heart"></i>
@@ -499,7 +493,6 @@
         </div>
       </div>
 
-      <!-- Right: login form -->
       <div class="auth-right">
         <div class="auth-header">
           <div>
@@ -508,7 +501,6 @@
           </div>
         </div>
 
-        <!-- Show message from controller -->
         <div th:if="${msg}" class="alert-msg">
           <i class="fas fa-circle-exclamation"></i>
           <span th:text="${msg}">Invalid username or password.</span>
@@ -575,13 +567,20 @@
             New here?
             <a th:href="@{/SignupPage}">Create an account</a>
           </div>
+
+          <div class="small-text" style="margin-top: 10px;">
+             <a th:href="@{/resendVerification}" style="color: #94a3b8; font-size: 11px;">
+               Didn’t receive verification email?
+             </a>
+          </div>
+
         </form>
       </div>
     </div>
   </section>
 
   <script>
-    // Navbar scroll effect (same as home)
+    // Navbar scroll effect
     window.addEventListener('scroll', () => {
       const navbar = document.querySelector('.navbar');
       if(window.scrollY > 50){

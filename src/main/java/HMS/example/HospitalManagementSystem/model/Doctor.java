@@ -142,4 +142,14 @@ public class Doctor {
                 ", detailsCompleted=" + detailsCompleted +
                 '}';
     }
+
+	public void setRejected(boolean b) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public boolean isRejected() {
+		// TODO Auto-generated method stub
+		return false;
+	}
 }

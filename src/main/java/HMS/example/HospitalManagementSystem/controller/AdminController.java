@@ -12,6 +12,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import HMS.example.HospitalManagementSystem.model.Contact;
 import HMS.example.HospitalManagementSystem.model.Doctor;
+import HMS.example.HospitalManagementSystem.model.Login; // ✅ Added Login Import
 import HMS.example.HospitalManagementSystem.model.Patient;
 import jakarta.servlet.http.HttpSession;
 import java.time.LocalDateTime;
@@ -24,12 +25,12 @@ public class AdminController {
     @Autowired
     private SessionFactory sf;
 
+    // ----------------- DASHBOARD -----------------
     @GetMapping("/dashboard")
     public String dashboard(Model model, HttpSession session) {
 
         Session ss = sf.openSession();
         try {
-
             Long totalDoctors = ss.createQuery(
                     "select count(d.id) from Doctor d", Long.class
             ).uniqueResult();
@@ -44,7 +45,7 @@ public class AdminController {
                     Long.class
             ).uniqueResult();
 
-            // pending doctor list
+            // Pending doctor list
             List<Doctor> pendingDoctors = ss.createQuery(
                     "from Doctor d where d.approved = false or d.approved is null order by d.name",
                     Doctor.class
@@ -61,9 +62,6 @@ public class AdminController {
 
         return "admin_dashboard";
     }
-
-
-
 
     // ----------------- DOCTORS LIST PAGE (ONLY APPROVED DOCTORS) -----------------
     @GetMapping("/doctors")
@@ -83,10 +81,7 @@ public class AdminController {
         return "admin_doctors";
     }
 
-
-    //  NO /doctors/new – admin will NOT create doctors manually
-
-    // ----------------- EDIT DOCTOR (ONLY FIELDS FROM Doctor.java) -----------------
+    // ----------------- EDIT DOCTOR -----------------
     @GetMapping("/doctors/edit/{id}")
     public String editDoctorForm(@PathVariable("id") Long id,
                                  Model model,
@@ -100,7 +95,7 @@ public class AdminController {
                 return "redirect:/admin/doctors";
             }
             model.addAttribute("doctor", d);
-            return "admin_doctor_form";   // form with name/email/phone/specialization
+            return "admin_doctor_form";   
         } finally {
             ss.close();
         }
@@ -126,9 +121,8 @@ public class AdminController {
             d.setEmail(formDoctor.getEmail());
             d.setPhone(formDoctor.getPhone());
             d.setSpecialization(formDoctor.getSpecialization());
-            // approved & approvedAt only changed via approve/reject
+            
             ss.update(d);
-
             tx.commit();
 
             ra.addFlashAttribute("msg", "Doctor updated successfully.");
@@ -143,7 +137,7 @@ public class AdminController {
         }
     }
 
-    // ----------------- APPROVE / REJECT / DELETE DOCTOR -----------------
+    // ----------------- APPROVE DOCTOR -----------------
     @PostMapping("/doctors/{id}/approve")
     public String approveDoctor(@PathVariable("id") Long id,
                                 RedirectAttributes ra) {
@@ -156,7 +150,7 @@ public class AdminController {
             if (d == null) {
                 if (tx != null) tx.rollback();
                 ra.addFlashAttribute("msg", "Doctor not found.");
-                return "redirect:/admin/dashboard"; // come back to dashboard
+                return "redirect:/admin/dashboard"; 
             }
 
             d.setApproved(true);
@@ -176,6 +170,7 @@ public class AdminController {
         }
     }
 
+    // ----------------- REJECT DOCTOR (UPDATED) -----------------
     @PostMapping("/doctors/{id}/reject")
     public String rejectDoctor(@PathVariable("id") Long id,
                                RedirectAttributes ra) {
@@ -185,16 +180,27 @@ public class AdminController {
         try {
             tx = ss.beginTransaction();
             Doctor d = ss.get(Doctor.class, id);
+            
             if (d == null) {
                 if (tx != null) tx.rollback();
                 ra.addFlashAttribute("msg", "Doctor not found.");
                 return "redirect:/admin/dashboard";
             }
 
+            // ✅ CRITICAL FIX: Delete from Login table first
+            String email = d.getEmail();
+            if (email != null) {
+                Login loginRecord = ss.get(Login.class, email);
+                if (loginRecord != null) {
+                    ss.delete(loginRecord);
+                }
+            }
+
+            // Delete Doctor record
             ss.delete(d);
             tx.commit();
 
-            ra.addFlashAttribute("msg", "Doctor '" + d.getName() + "' rejected and removed.");
+            ra.addFlashAttribute("msg", "Doctor '" + d.getName() + "' rejected and account removed.");
             return "redirect:/admin/dashboard";
         } catch (Exception ex) {
             if (tx != null) tx.rollback();
@@ -206,6 +212,7 @@ public class AdminController {
         }
     }
 
+    // ----------------- DELETE DOCTOR (UPDATED) -----------------
     @PostMapping("/doctors/delete/{id}")
     public String deleteDoctor(@PathVariable("id") Long id,
                                RedirectAttributes ra) {
@@ -219,6 +226,15 @@ public class AdminController {
                 if (tx != null) tx.rollback();
                 ra.addFlashAttribute("msg", "Doctor not found.");
                 return "redirect:/admin/doctors";
+            }
+
+            // ✅ CRITICAL FIX: Delete from Login table first (Prevents zombie accounts)
+            String email = d.getEmail();
+            if (email != null) {
+                Login loginRecord = ss.get(Login.class, email);
+                if (loginRecord != null) {
+                    ss.delete(loginRecord);
+                }
             }
 
             ss.delete(d);
@@ -236,7 +252,7 @@ public class AdminController {
         }
     }
 
-    // ----------------- PATIENT CRUD (ADMIN CAN ADD MANUALLY) -----------------
+    // ----------------- PATIENT CRUD -----------------
     @GetMapping("/patients")
     public String listPatients(Model model) {
         Session ss = sf.openSession();
@@ -366,7 +382,8 @@ public class AdminController {
             ss.close();
         }
     }
-    // ---------- ADMIN: view "Get in Touch" submissions ----------
+    
+    // ----------------- CONTACTS SECTION -----------------
     @GetMapping("/contacts")
     public String viewContactSubmissions(HttpSession httpSession, Model model) {
 
@@ -387,7 +404,7 @@ public class AdminController {
             session.close();
         }
     }
- // ---------- ADMIN: view single contact ----------
+
     @GetMapping("/contacts/view/{id}")
     public String viewSingleContact(@PathVariable("id") Long id,
                                     HttpSession httpSession,
@@ -409,10 +426,8 @@ public class AdminController {
                 return "redirect:/admin/contacts";
             }
 
-            // ✅ THIS WAS MISSING
             model.addAttribute("contact", contact);
-
-            return "admin_contact_view"; // your HTML file name
+            return "admin_contact_view"; 
 
         } finally {
             session.close();
@@ -457,7 +472,4 @@ public class AdminController {
             session.close();
         }
     }
-
-
-
 }

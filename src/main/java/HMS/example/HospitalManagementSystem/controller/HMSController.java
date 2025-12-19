@@ -298,6 +298,7 @@ public class HMSController {
         return "home";
     }
 
+ 
 
     // ---------- signup ----------
     @RequestMapping("SignupPage")
@@ -380,6 +381,57 @@ public class HMSController {
             return "signup";
         }
     }
+
+    @GetMapping("/resendVerification")
+    public String resendVerificationPage() {
+        return "resend_verification";
+    }
+
+    @PostMapping("/resendVerification")
+    public String resendVerification(@RequestParam String username, Model model) {
+
+        Session session = sf.openSession();
+        Transaction tx = null;
+
+        try {
+            tx = session.beginTransaction();
+            Login login = session.get(Login.class, username.trim());
+
+            if (login == null) {
+                model.addAttribute("msg",
+                    "If this account exists, a verification email has been sent.");
+                return "resend_verification";
+            }
+
+            if (Boolean.TRUE.equals(login.getEmailVerified())) {
+                model.addAttribute("msg", "Email already verified. Please login.");
+                return "login";
+            }
+
+            String code = UUID.randomUUID().toString();
+            login.setVerificationCode(code);
+            session.update(login);
+            tx.commit();
+
+            String link = "http://localhost:8080/verify?username="
+                    + URLEncoder.encode(username, "UTF-8")
+                    + "&code="
+                    + URLEncoder.encode(code, "UTF-8");
+
+            emailService.sendVerificationEmail(username, link);
+
+            model.addAttribute("msg", "Verification email sent again.");
+            return "home";
+
+        } catch (Exception e) {
+            if (tx != null) tx.rollback();
+            model.addAttribute("msg", "Error sending verification email.");
+            return "resend_verification";
+        } finally {
+            session.close();
+        }
+    }
+
 
     // ---------- FORGOT PASSWORD (REQUEST) ----------
     @GetMapping("/forgotPasswordPage")

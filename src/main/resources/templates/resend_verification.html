@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Resend Verification Email</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #0a1929;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card {
+            background: rgba(255,255,255,0.06);
+            padding: 32px;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+        }
+
+        h2 {
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        p {
+            font-size: 14px;
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 20px;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px;
+            border-radius: 10px;
+            border: none;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            border-radius: 10px;
+            border: none;
+            background: #00b4d8;
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .msg {
+            margin-top: 12px;
+            font-size: 14px;
+            color: #4ade80;
+        }
+
+        .error {
+            color: #f87171;
+        }
+
+        a {
+            display: block;
+            margin-top: 16px;
+            font-size: 13px;
+            color: #90e0ef;
+            text-align: center;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Resend Verification Email</h2>
+    <p>Enter your registered email to receive a new verification link.</p>
+
+    <form th:action="@{/resendVerification}" method="post">
+        <input type="email"
+               name="username"
+               placeholder="Enter your email"
+               required />
+
+        <button type="submit">Send Verification Link</button>
+    </form>
+
+    <div class="msg" th:if="${msg}" th:text="${msg}"></div>
+    <div class="msg error" th:if="${error}" th:text="${error}"></div>
+
+    <a th:href="@{/login}">Back to Login</a>
+</div>
+
+</body>
+</html>

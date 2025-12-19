@@ -1,467 +1,332 @@
-<!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Medical Records | Nexus Health</title>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Medical Records | Axes Health</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* --- Variables (Matches Dashboard) --- */
+    * { margin: 0; padding: 0; box-sizing: border-box; outline: none; }
+    
+    :root {
+      --primary-pink: #f472b6;
+      --primary-fuchsia: #d946ef;
+      --accent-cyan: #0ea5e9; 
+      --accent-amber: #fbbf24;
+      --accent-green: #4ade80;
+      
+      --bg-deep: #0b1121;
+      --card-bg: rgba(15, 23, 42, 0.7);
+      --card-border: rgba(255, 255, 255, 0.08);
+      
+      --text-white: #ffffff;
+      --text-soft: #e2e8f0;
+      --text-dim: #94a3b8;
+      
+      --transition: all 0.3s ease;
+      --glow-shadow: 0 10px 40px -10px rgba(14, 165, 233, 0.2);
+    }
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--bg-deep);
+      color: var(--text-white);
+      min-height: 100vh;
+      overflow-x: hidden;
+      padding: 1.5rem;
+      position: relative;
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(14, 165, 233, 0.15) 0, transparent 50%), 
+        radial-gradient(circle at 85% 85%, rgba(131, 24, 67, 0.25) 0, transparent 50%);
+    }
 
-    <style>
-        :root {
-            --bg-dark: #020617;
-            --accent-cyan: #00e5ff;
-            --accent-blue: #0077b6;
-            --card-bg: rgba(15, 23, 42, 0.6);
-            --card-border: rgba(255, 255, 255, 0.08);
-            --text-main: #f8fafc;
-            --text-dim: #94a3b8;
-            --transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        }
+    /* Floating Orbs */
+    .orb {
+        position: fixed;
+        border-radius: 50%;
+        filter: blur(100px);
+        opacity: 0.4;
+        z-index: -1;
+        pointer-events: none;
+        animation: floatOrb 20s infinite alternate ease-in-out;
+    }
+    .orb-1 { width: 600px; height: 600px; background: var(--accent-cyan); top: -200px; left: -150px; }
+    .orb-2 { width: 500px; height: 500px; background: var(--primary-fuchsia); bottom: -150px; right: -100px; animation-delay: -5s; }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+    @keyframes floatOrb {
+        0% { transform: translate(0, 0) scale(1); }
+        100% { transform: translate(30px, 50px) scale(1.1); }
+    }
 
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: var(--bg-dark);
-            background-image: 
-                radial-gradient(at 0% 0%, rgba(0, 119, 182, 0.15) 0, transparent 50%), 
-                radial-gradient(at 100% 0%, rgba(0, 229, 255, 0.1) 0, transparent 50%);
-            color: var(--text-main);
-            min-height: 100vh;
-            padding: 2rem;
-            line-height: 1.6;
-            overflow-x: hidden;
-        }
+    .container { max-width: 1200px; margin: auto; }
 
-        /* Background Animation */
-        .bg-blobs {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            overflow: hidden;
-            filter: blur(80px);
-        }
+    /* Header */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.25rem 2rem;
+      background: var(--card-bg);
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+      border: 1px solid var(--card-border);
+      border-radius: 24px;
+      margin-bottom: 2rem;
+      box-shadow: var(--glow-shadow);
+    }
 
-        .blob {
-            position: absolute;
-            width: 500px;
-            height: 500px;
-            background: var(--accent-blue);
-            border-radius: 50%;
-            opacity: 0.1;
-            animation: move 25s infinite alternate;
-        }
+    .brand-section { display: flex; align-items: center; gap: 1rem; }
+    .page-icon {
+        width: 42px; height: 42px; border-radius: 12px;
+        background: linear-gradient(135deg, var(--accent-cyan), #3b82f6);
+        display: flex; align-items: center; justify-content: center;
+        color: white; font-size: 1.2rem; box-shadow: 0 0 15px rgba(14, 165, 233, 0.3);
+    }
+    .header-title h1 { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.5px; }
+    .header-title p { font-size: 0.85rem; color: var(--text-dim); }
 
-        @keyframes move {
-            from { transform: translate(-10%, -10%); }
-            to { transform: translate(110%, 90%); }
-        }
+    /* Buttons */
+    .btn-action {
+      padding: 0.6rem 1.2rem; border-radius: 12px;
+      font-size: 0.85rem; font-weight: 700; text-decoration: none;
+      display: inline-flex; align-items: center; gap: 8px;
+      transition: var(--transition); border: none; cursor: pointer;
+    }
+    
+    .btn-outline { background: transparent; color: var(--text-white); border: 1px solid rgba(255, 255, 255, 0.2); }
+    .btn-outline:hover { border-color: var(--accent-cyan); background: rgba(56, 189, 248, 0.1); }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            animation: fadeIn 0.8s ease-out;
-        }
+    .btn-primary { background: var(--text-white); color: #0f172a; box-shadow: 0 4px 15px rgba(255,255,255,0.1); }
+    .btn-primary:hover { background: var(--accent-cyan); color: #fff; box-shadow: 0 8px 25px rgba(56, 189, 248, 0.4); transform: translateY(-2px); }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+    /* Search Bar */
+    .controls { display: flex; gap: 1rem; margin-bottom: 2rem; }
+    .search-wrapper { flex: 1; position: relative; }
+    .search-wrapper i { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--text-dim); }
+    .search-input {
+        width: 100%; padding: 1rem 1rem 1rem 3rem;
+        background: var(--card-bg); border: 1px solid var(--card-border);
+        border-radius: 18px; color: var(--text-white); font-family: inherit;
+        backdrop-filter: blur(10px); transition: var(--transition);
+    }
+    .search-input:focus { border-color: var(--accent-cyan); box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.1); }
 
-        /* Header Styling */
-        .page-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 2rem 2.5rem;
-            background: var(--card-bg);
-            backdrop-filter: blur(12px);
-            border: 1px solid var(--card-border);
-            border-radius: 28px;
-            margin-bottom: 2.5rem;
-            box-shadow: 0 10px 40px -15px rgba(0,0,0,0.5);
-        }
+    /* Main Card */
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--card-border);
+      border-radius: 30px;
+      padding: 2rem;
+      box-shadow: var(--glow-shadow);
+      position: relative;
+      overflow: hidden;
+    }
+    .card::before {
+      content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent-cyan), var(--primary-pink), transparent);
+      opacity: 0.6;
+    }
 
-        .header-content h1 {
-            font-size: 1.75rem;
-            font-weight: 800;
-            letter-spacing: -0.02em;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
+    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+    .card-title { font-size: 1.2rem; font-weight: 700; color: var(--text-white); display: flex; align-items: center; gap: 10px; }
 
-        .header-content p {
-            color: var(--text-dim);
-            font-size: 0.9rem;
-            margin-top: 4px;
-        }
+    /* Tables */
+    .table-container { overflow-x: auto; }
+    table { width: 100%; border-collapse: separate; border-spacing: 0 8px; }
+    
+    th {
+      font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1.5px;
+      color: #7dd3fc; padding: 0 1rem 0.5rem; text-align: left; font-weight: 700;
+    }
+    
+    tbody tr {
+      background: rgba(255, 255, 255, 0.03);
+      transition: background 0.3s ease, transform 0.3s ease;
+    }
+    tbody tr:hover { background: rgba(255, 255, 255, 0.08); transform: scale(1.005) translateX(5px); }
 
-        .icon-box {
-            width: 50px;
-            height: 50px;
-            background: rgba(0, 180, 216, 0.1);
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--accent-cyan);
-            font-size: 1.4rem;
-        }
+    td { padding: 1.25rem 1rem; vertical-align: middle; color: var(--text-soft); font-size: 0.95rem; }
+    td:first-child { border-radius: 16px 0 0 16px; }
+    td:last-child { border-radius: 0 16px 16px 0; }
 
-        /* Controls Section */
-        .controls {
-            display: flex;
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
+    /* Avatars & Badges */
+    .avatar-sm {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: linear-gradient(135deg, var(--accent-cyan), #3b82f6);
+      color: #fff; display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 0.9rem;
+    }
 
-        .search-wrapper {
-            flex: 1;
-            position: relative;
-        }
+    .badge { padding: 5px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; display: inline-block; }
+    .badge-diag { background: rgba(234, 179, 8, 0.15); color: #facc15; border: 1px solid rgba(234, 179, 8, 0.3); }
+    .badge-rx { background: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.3); }
 
-        .search-wrapper i {
-            position: absolute;
-            left: 1.25rem;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-dim);
-        }
+    /* Attachments */
+    .file-link {
+        color: var(--accent-cyan); text-decoration: none; font-size: 0.85rem; font-weight: 600;
+        display: flex; align-items: center; gap: 6px; transition: var(--transition);
+        margin-bottom: 4px;
+    }
+    .file-link:hover { color: #fff; text-decoration: underline; }
 
-        .search-input {
-            width: 100%;
-            padding: 1rem 1rem 1rem 3.5rem;
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 18px;
-            color: var(--text-main);
-            font-family: inherit;
-            font-size: 0.95rem;
-            transition: var(--transition);
-        }
+    /* Action Icons */
+    .action-group { display: flex; gap: 8px; }
+    .icon-btn {
+        width: 34px; height: 34px; border-radius: 8px;
+        display: flex; align-items: center; justify-content: center;
+        background: rgba(255, 255, 255, 0.05); border: 1px solid var(--card-border);
+        color: var(--text-dim); transition: var(--transition); cursor: pointer; text-decoration: none;
+    }
+    .icon-btn:hover { background: var(--accent-cyan); color: #000; border-color: var(--accent-cyan); transform: translateY(-2px); }
+    .icon-btn.delete:hover { background: #ef4444; color: #fff; border-color: #ef4444; }
+    .icon-btn.email:hover { background: var(--accent-amber); color: #000; border-color: var(--accent-amber); }
 
-        .search-input:focus {
-            outline: none;
-            border-color: var(--accent-cyan);
-            background: rgba(255, 255, 255, 0.08);
-            box-shadow: 0 0 0 4px rgba(0, 229, 255, 0.1);
-        }
+    /* Empty State */
+    .empty-state { text-align: center; padding: 4rem 2rem; color: var(--text-dim); }
+    .empty-state i { font-size: 3rem; opacity: 0.2; margin-bottom: 1rem; }
 
-        /* Buttons */
-        .btn {
-            padding: 0.8rem 1.5rem;
-            border-radius: 16px;
-            font-weight: 700;
-            font-size: 0.9rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            cursor: pointer;
-            transition: var(--transition);
-            text-decoration: none;
-            border: 1px solid transparent;
-            font-family: inherit;
-        }
-
-        .btn-primary {
-            background: var(--accent-cyan);
-            color: var(--bg-dark);
-            box-shadow: 0 8px 20px rgba(0, 229, 255, 0.2);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 25px rgba(0, 229, 255, 0.4);
-        }
-
-        /* Records Card */
-        .records-card {
-            background: var(--card-bg);
-            backdrop-filter: blur(16px);
-            border: 1px solid var(--card-border);
-            border-radius: 28px;
-            padding: 2rem;
-            box-shadow: 0 20px 50px -20px rgba(0,0,0,0.5);
-        }
-
-        .card-title {
-            font-size: 1.25rem;
-            font-weight: 700;
-            margin-bottom: 2rem;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        /* Modern Table */
-        .table-container {
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0 10px;
-        }
-
-        th {
-            text-align: left;
-            padding: 0 1.25rem 0.75rem 1.25rem;
-            color: var(--text-dim);
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            font-weight: 800;
-        }
-
-        tbody tr {
-            background: rgba(255, 255, 255, 0.02);
-            transition: var(--transition);
-        }
-
-        tbody tr:hover {
-            background: rgba(255, 255, 255, 0.05);
-            transform: scale(1.005);
-        }
-
-        td {
-            padding: 1.25rem;
-            border-top: 1px solid var(--card-border);
-            border-bottom: 1px solid var(--card-border);
-            font-size: 0.95rem;
-        }
-
-        td:first-child { border-left: 1px solid var(--card-border); border-radius: 18px 0 0 18px; }
-        td:last-child { border-right: 1px solid var(--card-border); border-radius: 0 18px 18px 0; }
-
-        /* Badges */
-        .badge {
-            padding: 6px 12px;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .badge-diagnosis { background: rgba(251, 191, 36, 0.1); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.2); }
-        .badge-prescription { background: rgba(34, 197, 94, 0.1); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.2); }
-
-        /* File links */
-        .file-link {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: var(--accent-cyan);
-            text-decoration: none;
-            font-size: 0.85rem;
-            font-weight: 600;
-            margin-bottom: 4px;
-            transition: var(--transition);
-        }
-
-        .file-link:hover {
-            color: white;
-            transform: translateX(3px);
-        }
-
-        /* Actions */
-        .actions-cell {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .btn-icon {
-            width: 38px;
-            height: 38px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--text-dim);
-            border: 1px solid var(--card-border);
-            transition: var(--transition);
-            cursor: pointer;
-            text-decoration: none; /* Ensure link underline is removed */
-        }
-
-        .btn-icon:hover {
-            background: var(--accent-cyan);
-            color: var(--bg-dark);
-            border-color: var(--accent-cyan);
-            transform: translateY(-2px);
-        }
-
-        .btn-delete:hover {
-            background: #ef4444;
-            color: white;
-            border-color: #ef4444;
-        }
-
-        /* Notifications */
-        .alert {
-            margin-bottom: 2rem;
-            padding: 1.25rem 2rem;
-            border-radius: 20px;
-            background: rgba(34, 197, 94, 0.1);
-            border: 1px solid rgba(34, 197, 94, 0.2);
-            color: #4ade80;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            animation: slideDown 0.5s ease;
-        }
-
-        @keyframes slideDown {
-            from { transform: translateY(-20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        @media (max-width: 768px) {
-            .page-header { flex-direction: column; text-align: center; gap: 1.5rem; }
-            .controls { flex-direction: column; }
-            .btn { width: 100%; justify-content: center; }
-        }
-    </style>
+  </style>
 </head>
 
 <body>
 
-    <div class="bg-blobs">
-        <div class="blob"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<div class="container">
+
+  <header class="header">
+    <div class="brand-section">
+      <div class="page-icon"><i class="fas fa-file-medical-alt"></i></div>
+      <div class="header-title">
+        <h1>Medical Archives</h1>
+        <p>Manage patient history and diagnostics</p>
+      </div>
     </div>
+    
+    <div style="display: flex; gap: 1rem;">
+        <a th:href="@{/doctor/dashboard}" class="btn-action btn-outline">
+            <i class="fas fa-arrow-left"></i> Dashboard
+        </a>
+        <a th:href="@{/doctor/records/new}" class="btn-action btn-primary">
+            <i class="fas fa-plus"></i> New Record
+        </a>
+    </div>
+  </header>
 
-    <div class="container">
-        <div th:if="${successMsg}" class="alert">
-            <i class="fas fa-check-circle"></i>
-            <span th:text="${successMsg}">Record updated successfully!</span>
+  <div class="controls">
+    <div class="search-wrapper">
+        <i class="fas fa-search"></i>
+        <input id="searchInput" type="text" class="search-input" 
+               placeholder="Search by Patient Name, Diagnosis, or Prescription..." 
+               onkeyup="filterRecords()">
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+        <div class="card-title">
+            <i class="fas fa-database" style="color: var(--accent-cyan);"></i> Patient Database
         </div>
-
-        <header class="page-header">
-            <div class="header-content">
-                <h1>
-                    <div class="icon-box"><i class="fas fa-file-medical"></i></div>
-                    Medical Records
-                </h1>
-                <p>Comprehensive history and management of patient diagnostics</p>
-            </div>
-            <div style="display: flex; gap: 1rem;">
-                <a th:href="@{/doctor/dashboard}" class="btn btn-secondary" style="background: rgba(255,255,255,0.05); border: 1px solid var(--card-border); color: white;">
-                    <i class="fas fa-home"></i> Dashboard
-                </a>
-                <a th:href="@{/doctor/records/new}" class="btn btn-primary">
-                    <i class="fas fa-plus"></i> New Record
-                </a>
-            </div>
-        </header>
-
-        <div class="controls">
-            <div class="search-wrapper">
-                <i class="fas fa-search"></i>
-                <input id="searchInput" type="text" class="search-input" 
-                       placeholder="Search by patient name, diagnosis or prescription..." 
-                       onkeyup="filterRecords()">
-            </div>
-        </div>
-
-        <div class="records-card">
-            <h3 class="card-title"><i class="fas fa-list-ul" style="color: var(--accent-cyan);"></i> Active Patient Records</h3>
-
-            <div class="table-container">
-                <table id="recordsTable">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Patient</th>
-                            <th>Diagnosis</th>
-                            <th>Prescription</th>
-                            <th>Recorded Date</th>
-                            <th>Attachments</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr th:each="r, i : ${records}">
-                            <td th:text="${i.index + 1}" style="font-weight: 800; color: var(--text-dim);">1</td>
-                            <td>
-                                <div style="font-weight: 700; color: var(--text-main);" th:text="${r.patient.name}">James Wilson</div>
-                                <div style="font-size: 0.7rem; color: var(--text-dim);">PID: #<span th:text="${r.patient.id}">402</span></div>
-                            </td>
-                            <td><span class="badge badge-diagnosis" th:text="${r.diagnosis}">Influenza</span></td>
-                            <td><span class="badge badge-prescription" th:text="${r.prescription}">Oseltamivir</span></td>
-                            <td th:text="${r.recordDate}" style="color: var(--text-dim); font-size: 0.85rem;">2025-11-20</td>
-                            <td>
-                                <div th:each="f : ${r.reports}">
-                                    <a th:href="@{/records/files/{id}(id=${f.id})}" class="file-link">
-                                        <i class="fas fa-paperclip"></i>
-                                        <span th:text="${f.originalName}">report.pdf</span>
-                                    </a>
-                                </div>
-                                <span th:if="${#lists.isEmpty(r.reports)}" style="color: var(--text-dim); font-size: 0.8rem; font-style: italic;">No files</span>
-                            </td>
-                            <td>
-                                <div class="actions-cell">
-                                    
-                                    <a th:if="${r.appointment != null}" 
-                                       th:href="@{/doctor/appointments/{id}(id=${r.appointment.id})}" 
-                                       class="btn-icon" title="View Appointment">
-                                        <i class="fas fa-calendar-check"></i>
-                                    </a>
-
-                                    <a th:href="@{/doctor/records/edit/{id}(id=${r.id})}" 
-                                       class="btn-icon" title="Edit Record">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    
-                                    <form th:action="@{/doctor/records/{id}/delete(id=${r.id})}" method="post" 
-                                          onsubmit="return confirm('Are you sure you want to delete this medical record? This cannot be undone.');">
-                                        <button type="submit" class="btn-icon btn-delete" title="Delete Record">
-                                            <i class="fas fa-trash-alt"></i>
-                                        </button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                        
-                        <tr th:if="${#lists.isEmpty(records)}">
-                            <td colspan="7" style="text-align: center; padding: 5rem 0; color: var(--text-dim);">
-                                <i class="fas fa-folder-open" style="font-size: 3rem; opacity: 0.1; display: block; margin-bottom: 1rem;"></i>
-                                <p>No medical records found in the database.</p>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+        <div style="font-size: 0.85rem; color: var(--text-dim);">
+            Total Records: <span th:text="${records.size()}">0</span>
         </div>
     </div>
 
-    <script>
-        function filterRecords() {
-            const input = document.getElementById("searchInput").value.toLowerCase();
-            const rows = document.querySelectorAll("#recordsTable tbody tr:not(.empty-row)");
+    <div class="table-container">
+        <table id="recordsTable">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Patient</th>
+                    <th>Diagnosis</th>
+                    <th>Prescription</th>
+                    <th>Date Recorded</th>
+                    <th>Files</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="r, i : ${records}">
+                    <td th:text="${i.index + 1}" style="font-weight: 700; color: var(--text-dim);">1</td>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div class="avatar-sm" th:text="${r.patient != null ? #strings.substring(r.patient.name,0,1) : 'P'}">J</div>
+                            <div>
+                                <div style="font-weight: 700; color: #fff;" th:text="${r.patient.name}">John Doe</div>
+                                <div style="font-size: 0.75rem; color: var(--text-dim);">ID: <span th:text="${r.patient.id}">123</span></div>
+                            </div>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-diag" th:text="${r.diagnosis}">Flu</span></td>
+                    <td><span class="badge badge-rx" th:text="${#strings.abbreviate(r.prescription, 20)}">Meds...</span></td>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 6px; color: var(--text-dim);">
+                            <i class="far fa-calendar-alt"></i>
+                            <span th:text="${r.recordDate}">2025-10-12</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div th:each="f : ${r.reports}">
+                            <a th:href="@{/records/files/{id}(id=${f.id})}" class="file-link">
+                                <i class="fas fa-paperclip"></i> <span th:text="${#strings.abbreviate(f.originalName, 15)}">file.pdf</span>
+                            </a>
+                        </div>
+                        <span th:if="${#lists.isEmpty(r.reports)}" style="font-size: 0.8rem; opacity: 0.5;">No files</span>
+                    </td>
+                    <td>
+                        <div class="action-group">
+                            <form th:action="@{'/doctor/records/' + ${r.id} + '/email'}" method="post" 
+                                  onsubmit="return confirm('Send this record summary to the patient via email?');">
+                                <button type="submit" class="icon-btn email" title="Email to Patient">
+                                    <i class="fas fa-envelope"></i>
+                                </button>
+                            </form>
 
-            rows.forEach(row => {
-                const text = row.innerText.toLowerCase();
-                if (text.includes(input)) {
-                    row.style.display = "";
-                    row.style.opacity = "1";
-                } else {
-                    row.style.opacity = "0";
-                    setTimeout(() => {
-                        if (row.style.opacity === "0") row.style.display = "none";
-                    }, 200);
-                }
-            });
-        }
-    </script>
+                            <a th:href="@{/doctor/records/edit/{id}(id=${r.id})}" class="icon-btn" title="Edit">
+                                <i class="fas fa-pen"></i>
+                            </a>
+
+                            <form th:action="@{/doctor/records/{id}/delete(id=${r.id})}" method="post" 
+                                  onsubmit="return confirm('Are you sure? This cannot be undone.');">
+                                <button type="submit" class="icon-btn delete" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div th:if="${#lists.isEmpty(records)}" class="empty-state">
+            <i class="fas fa-folder-open"></i>
+            <h3>No Medical Records Found</h3>
+            <p>Start by adding a new record for a patient.</p>
+        </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+    function filterRecords() {
+        const input = document.getElementById("searchInput").value.toLowerCase();
+        const rows = document.querySelectorAll("#recordsTable tbody tr");
+
+        rows.forEach(row => {
+            const text = row.innerText.toLowerCase();
+            if (text.includes(input)) {
+                row.style.display = "";
+            } else {
+                row.style.display = "none";
+            }
+        });
+    }
+</script>
+
 </body>
 </html>

@@ -791,14 +791,14 @@
                             </form>
 
                             <!-- REJECT -->
-                            <form th:action="@{'/admin/doctors/' + ${d.id} + '/reject'}"
-                                  method="post"
-                                  style="display:inline;"
-                                  onsubmit="return confirm('Reject this doctor?');">
-                                <button type="submit" class="btn btn-reject">
-                                    <i class="fas fa-times"></i> Reject
-                                </button>
-                            </form>
+                           <form th:action="@{/admin/doctors/{id}/reject(id=${d.id})}"
+      method="post"
+      onsubmit="return confirm('Reject doctor and delete credentials?');">
+
+    <button type="submit" class="btn btn-reject">
+    <i class="fas fa-times"></i> Reject
+</button>
+
                         </div>
                     </td>
                 </tr>
