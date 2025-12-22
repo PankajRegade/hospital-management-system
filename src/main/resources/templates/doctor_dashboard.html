@@ -2,8 +2,8 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Doctor Dashboard | Axes Health</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Doctor Dashboard | AXES Health</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
@@ -43,236 +43,176 @@
 
     /* Floating Orbs */
     .orb {
-        position: fixed;
-        border-radius: 50%;
-        filter: blur(100px);
-        opacity: 0.4;
-        z-index: -1;
-        pointer-events: none;
+        position: fixed; border-radius: 50%; filter: blur(100px); opacity: 0.4; z-index: -1; pointer-events: none;
         animation: floatOrb 20s infinite alternate ease-in-out;
     }
     .orb-1 { width: 600px; height: 600px; background: var(--accent-cyan); top: -200px; left: -150px; }
     .orb-2 { width: 500px; height: 500px; background: var(--primary-fuchsia); bottom: -150px; right: -100px; animation-delay: -5s; }
-
-    @keyframes floatOrb {
-        0% { transform: translate(0, 0) scale(1); }
-        100% { transform: translate(30px, 50px) scale(1.1); }
-    }
-
+    @keyframes floatOrb { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(30px, 50px) scale(1.1); } }
     @keyframes scanline { 0% { transform: translateY(-100%); } 100% { transform: translateY(400%); } }
 
     .container { max-width: 1200px; margin: auto; }
 
     /* Header */
     .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1.25rem 2rem;
-      background: var(--card-bg);
-      backdrop-filter: blur(25px);
-      -webkit-backdrop-filter: blur(25px);
-      border: 1px solid var(--card-border);
-      border-radius: 24px;
-      margin-bottom: 2rem;
-      box-shadow: var(--glow-shadow);
+      display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 2rem;
+      background: var(--card-bg); backdrop-filter: blur(25px); border: 1px solid var(--card-border);
+      border-radius: 24px; margin-bottom: 2rem; box-shadow: var(--glow-shadow);
     }
-
     .doctor-profile-brand { display: flex; align-items: center; gap: 1.25rem; }
-
-    .avatar-ring {
-      padding: 3px;
-      border-radius: 18px;
-      background: linear-gradient(135deg, var(--primary-fuchsia), var(--accent-cyan));
-      box-shadow: 0 0 20px rgba(14, 165, 233, 0.3);
-    }
-
-    .doctor-avatar {
-      width: 54px; height: 54px;
-      border-radius: 15px;
-      background: #0f172a;
-      display: flex; align-items: center; justify-content: center;
-      overflow: hidden;
-    }
+    .avatar-ring { padding: 3px; border-radius: 18px; background: linear-gradient(135deg, var(--primary-fuchsia), var(--accent-cyan)); box-shadow: 0 0 20px rgba(14, 165, 233, 0.3); }
+    .doctor-avatar { width: 54px; height: 54px; border-radius: 15px; background: #0f172a; display: flex; align-items: center; justify-content: center; overflow: hidden; }
     .doctor-avatar img { width: 100%; height: 100%; object-fit: cover; }
     .doctor-avatar i { color: var(--accent-cyan); font-size: 1.5rem; }
-
     .header-info h1 { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.5px; }
     #current-time { font-size: 0.8rem; font-weight: 600; color: #38bdf8; margin-top: 4px; }
 
-    .dashboard-grid {
-      display: grid;
-      grid-template-columns: 1fr 360px;
-      gap: 2rem;
-    }
-    @media (max-width: 1024px) { .dashboard-grid { grid-template-columns: 1fr; } }
-
-    .card {
-      background: var(--card-bg);
-      backdrop-filter: blur(20px);
-      border: 1px solid var(--card-border);
-      border-radius: 30px;
-      padding: 2rem;
-      box-shadow: var(--glow-shadow);
-      transition: var(--transition);
-      position: relative;
-      overflow: hidden;
-    }
-    .card:hover { transform: translateY(-5px); box-shadow: 0 15px 50px -10px rgba(14, 165, 233, 0.25); border-color: rgba(56, 189, 248, 0.2); }
+    .dashboard-grid { display: grid; grid-template-columns: 1fr 360px; gap: 2rem; }
     
-    .card::before {
-      content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px;
-      background: linear-gradient(90deg, transparent, #38bdf8, var(--primary-pink), transparent);
-      opacity: 0.6;
+    .card {
+      background: var(--card-bg); backdrop-filter: blur(20px); border: 1px solid var(--card-border);
+      border-radius: 30px; padding: 2rem; box-shadow: var(--glow-shadow);
+      transition: var(--transition); position: relative; overflow: hidden;
     }
-
+    .card:hover { transform: translateY(-5px); border-color: rgba(56, 189, 248, 0.2); }
+    
     .card-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
     .card-title h3 { font-size: 1.15rem; font-weight: 800; display: flex; gap: 1rem; align-items: center; }
-
     .icon-box {
-      width: 42px; height: 42px;
-      border-radius: 14px;
-      background: rgba(255, 255, 255, 0.05);
-      display: flex; align-items: center; justify-content: center;
-      color: #38bdf8;
-      font-size: 1.1rem;
-      transition: var(--transition);
-    }
-    .card:hover .icon-box { background: #38bdf8; color: #fff; transform: rotate(10deg); }
-
-    /* Axes ID Card */
-    .axes-id-card {
-        padding: 0 !important;
-        background: #0f172a;
-        border: 1px solid rgba(56, 189, 248, 0.3);
-        box-shadow: 0 0 30px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(56, 189, 248, 0.05);
-        overflow: hidden;
+      width: 42px; height: 42px; border-radius: 14px; background: rgba(255, 255, 255, 0.05);
+      display: flex; align-items: center; justify-content: center; color: #38bdf8; font-size: 1.1rem; transition: var(--transition);
     }
 
-    .axes-id-header {
-        background: linear-gradient(90deg, var(--accent-cyan) 0%, #3b82f6 100%);
-        padding: 12px 24px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
+    /* ID Card & Sidebar Styles */
+    .axes-id-card { padding: 0 !important; background: #0f172a; border: 1px solid rgba(56, 189, 248, 0.3); overflow: hidden; }
+    .axes-id-header { background: linear-gradient(90deg, var(--accent-cyan) 0%, #3b82f6 100%); padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; }
     .axes-logo { font-weight: 900; font-size: 18px; color: #fff; letter-spacing: 2px; }
     .axes-id-label { font-size: 10px; font-weight: 800; color: #fff; text-transform: uppercase; opacity: 0.9; }
-
-    .axes-id-content {
-        padding: 32px 24px;
-        position: relative;
-        background: radial-gradient(circle at top right, rgba(14, 165, 233, 0.1), transparent);
-    }
-
-    .axes-id-content::after {
-        content: "";
-        position: absolute;
-        top: 0; left: 0; right: 0; bottom: 0;
-        background: linear-gradient(to bottom, transparent, rgba(56, 189, 248, 0.1), transparent);
-        height: 20%;
-        animation: scanline 4s linear infinite;
-        pointer-events: none;
-        z-index: 10;
-    }
-
+    .axes-id-content { padding: 32px 24px; position: relative; background: radial-gradient(circle at top right, rgba(14, 165, 233, 0.1), transparent); }
+    .axes-id-content::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to bottom, transparent, rgba(56, 189, 248, 0.1), transparent); height: 20%; animation: scanline 4s linear infinite; pointer-events: none; }
     .axes-id-top { display: flex; gap: 20px; margin-bottom: 30px; align-items: center; }
-
-    .axes-photo-frame {
-        width: 90px; height: 90px;
-        border-radius: 16px;
-        background: #1e293b;
-        border: 2px solid var(--accent-cyan);
-        display: flex; align-items: center; justify-content: center;
-        overflow: hidden;
-        box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
-        position: relative;
-    }
+    .axes-photo-frame { width: 90px; height: 90px; border-radius: 16px; background: #1e293b; border: 2px solid var(--accent-cyan); display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
     .axes-photo-frame img { width: 100%; height: 100%; object-fit: cover; }
     .axes-photo-frame i { font-size: 30px; color: var(--accent-cyan); }
-
     .axes-meta { flex: 1; }
-    .axes-name { font-size: 18px; font-weight: 800; color: #fff; margin-bottom: 4px; letter-spacing: -0.5px; }
-    .axes-uid {
-        font-family: 'Courier New', monospace;
-        font-size: 12px;
-        color: var(--accent-cyan);
-        font-weight: 700;
-        background: rgba(56, 189, 248, 0.1);
-        padding: 4px 10px;
-        border-radius: 6px;
-        display: inline-block;
-    }
-
-    .axes-id-data-grid {
-        display: grid; grid-template-columns: 1fr; gap: 16px;
-        border-top: 1px solid rgba(255,255,255,0.05);
-        padding-top: 24px;
-    }
-
+    .axes-name { font-size: 18px; font-weight: 800; color: #fff; margin-bottom: 4px; }
+    .axes-uid { font-family: 'Courier New', monospace; font-size: 12px; color: var(--accent-cyan); font-weight: 700; background: rgba(56, 189, 248, 0.1); padding: 4px 10px; border-radius: 6px; display: inline-block; }
+    .axes-id-data-grid { display: grid; grid-template-columns: 1fr; gap: 16px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 24px; }
     .axes-data-box { display: flex; align-items: center; justify-content: space-between; }
     .axes-data-box label { font-size: 10px; text-transform: uppercase; color: var(--text-dim); letter-spacing: 1.5px; font-weight: 700; }
     .axes-data-box span { font-size: 14px; font-weight: 600; color: #fff; text-align: right; }
-
-    .axes-chip {
-        margin-top: 24px;
-        background: rgba(255,255,255,0.03);
-        padding: 12px;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        border: 1px solid rgba(255,255,255,0.05);
-    }
+    .axes-chip { margin-top: 24px; background: rgba(255,255,255,0.03); padding: 12px; border-radius: 12px; display: flex; align-items: center; gap: 12px; border: 1px solid rgba(255,255,255,0.05); }
     .axes-chip-icon { width: 30px; height: 20px; background: linear-gradient(135deg, #cbd5e1, #64748b); border-radius: 4px; }
     .axes-chip-text { font-size: 10px; font-weight: 600; color: var(--text-dim); text-transform: uppercase; }
 
-
-    /* --- Tables --- */
+    /* Tables */
     .table-container { overflow-x: auto; }
-    table { width: 100%; border-collapse: separate; border-spacing: 0 8px; }
-    
-    th {
-      font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px;
-      color: #7dd3fc; padding: 0 1rem 0.5rem; text-align: left; font-weight: 700;
-    }
-    
-    tbody tr {
-      background: rgba(255, 255, 255, 0.03);
-      transition: background 0.3s ease, transform 0.3s ease;
-      opacity: 1; /* Always visible */
-    }
-    tbody tr:hover { background: rgba(255, 255, 255, 0.08); transform: scale(1.01) translateX(5px); }
-
-    td { padding: 1.25rem 1rem; vertical-align: middle; }
-    td:first-child { border-radius: 16px 0 0 16px; }
-    td:last-child { border-radius: 0 16px 16px 0; }
-
-    .avatar-sm {
-      width: 40px; height: 40px; border-radius: 12px;
-      background: linear-gradient(135deg, #0ea5e9, #3b82f6);
-      color: #fff; display: flex; align-items: center; justify-content: center;
-      font-weight: 800; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    }
+    table { width: 100%; border-collapse: separate; border-spacing: 0 8px; min-width: 600px; }
+    th { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px; color: #7dd3fc; padding: 0 1rem 0.5rem; text-align: left; font-weight: 700; }
+    tbody tr { background: rgba(255, 255, 255, 0.03); transition: 0.3s; }
+    td { padding: 1.25rem 1rem; vertical-align: middle; border-top: 1px solid rgba(255,255,255,0.02); border-bottom: 1px solid rgba(255,255,255,0.02); }
+    td:first-child { border-radius: 16px 0 0 16px; border-left: 1px solid rgba(255,255,255,0.02); }
+    td:last-child { border-radius: 0 16px 16px 0; border-right: 1px solid rgba(255,255,255,0.02); }
+    .avatar-sm { width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, #0ea5e9, #3b82f6); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; }
     .name-text { font-size: 1rem; font-weight: 700; color: #fff; }
     .ref-text { font-size: 0.8rem; color: var(--text-dim); opacity: 0.8; }
 
-    .btn-action {
-      padding: 0.7rem 1.4rem; border-radius: 14px;
-      font-size: 0.85rem; font-weight: 700; text-decoration: none;
-      display: inline-flex; align-items: center; gap: 8px;
-      transition: var(--transition); border: none; cursor: pointer;
-    }
-    .btn-primary { background: var(--text-white); color: #0f172a; box-shadow: 0 4px 15px rgba(255,255,255,0.1); }
-    .btn-primary:hover { background: #38bdf8; color: #fff; box-shadow: 0 8px 25px rgba(56, 189, 248, 0.4); transform: translateY(-2px); }
-    
+    /* Buttons */
+    .btn-action { padding: 0.7rem 1.4rem; border-radius: 14px; font-size: 0.85rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; border: none; cursor: pointer; transition: 0.3s; }
+    .btn-primary { background: var(--text-white); color: #0f172a; }
     .btn-outline { background: transparent; color: var(--text-white); border: 1px solid rgba(255, 255, 255, 0.2); }
-    .btn-outline:hover { border-color: #38bdf8; background: rgba(56, 189, 248, 0.1); }
-
     .logout-btn { background: rgba(251, 191, 36, 0.1); color: var(--accent-amber); border: 1px solid rgba(251, 191, 36, 0.3); }
-    .logout-btn:hover { background: var(--accent-amber); color: #000; box-shadow: 0 0 20px rgba(251, 191, 36, 0.4); }
+    .border-danger { border-color: rgba(239, 68, 68, 0.3) !important; }
+    .text-danger { color: #ef4444 !important; }
+    .btn-outline-danger { background: transparent; color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); width: 100%; justify-content: center; }
 
+    /* Alert */
+    .custom-alert { position: fixed; top: 100px; right: 20px; z-index: 9999; background: rgba(15, 23, 42, 0.95); border-left: 4px solid #10b981; border-radius: 12px; padding: 16px 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: flex; align-items: center; gap: 12px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); animation: slideIn 0.5s ease-out; color: #e2e8f0; }
+    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+    /* --- MOBILE OPTIMIZATIONS (Compact) --- */
+    @media (max-width: 1024px) {
+        .dashboard-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 768px) {
+        body { padding: 0.75rem; }
+        .container { padding: 0; max-width: 100%; }
+        
+        /* Compact Header */
+        .header {
+            flex-direction: column; gap: 1rem; padding: 1rem; text-align: center;
+            border-radius: 20px; margin-bottom: 1.5rem;
+        }
+        .doctor-profile-brand { flex-direction: column; text-align: center; gap: 0.5rem; }
+        .doctor-avatar { width: 48px; height: 48px; }
+        .header-info h1 { font-size: 1.2rem; margin-bottom: 0; }
+        .logout-btn { width: 100%; justify-content: center; padding: 0.6rem; font-size: 0.8rem; }
+
+        /* Compact Cards */
+        .card { padding: 1rem; border-radius: 20px; margin-bottom: 1rem; }
+        .card-title { margin-bottom: 1rem; flex-direction: column; align-items: flex-start; gap: 0.75rem; }
+        .card-title h3 { font-size: 1rem; gap: 0.5rem; }
+        .icon-box { width: 32px; height: 32px; font-size: 0.9rem; border-radius: 10px; }
+        .card-title .btn-action { padding: 0.5rem 1rem; font-size: 0.75rem; border-radius: 10px; width: 100%; justify-content: center; }
+
+        /* Compact Table */
+        .table-container { margin: 0 -1rem; padding: 0 1rem; }
+        table { min-width: 100%; border-spacing: 0 6px; }
+        th { font-size: 0.6rem; padding: 0 0.5rem 0.5rem; letter-spacing: 1px; }
+        td { padding: 0.75rem 0.5rem; font-size: 0.85rem; }
+        td:first-child { border-radius: 12px 0 0 12px; }
+        td:last-child { border-radius: 0 12px 12px 0; }
+        .avatar-sm { width: 32px; height: 32px; font-size: 0.75rem; border-radius: 10px; }
+        .name-text { font-size: 0.85rem; }
+        .ref-text { font-size: 0.7rem; }
+        td .btn-action { padding: 0.4rem 0.6rem; font-size: 0.7rem; border-radius: 8px; gap: 4px; }
+        td .btn-action i { font-size: 0.7rem; }
+
+        /* Make action buttons stack on very small screens */
+        td > div { flex-wrap: wrap; }
+
+        /* Sidebar Items */
+        .axes-id-content { padding: 1.5rem 1rem; }
+        .axes-id-top { gap: 12px; margin-bottom: 20px; }
+        .axes-photo-frame { width: 70px; height: 70px; }
+        .axes-photo-frame i { font-size: 24px; }
+        .axes-name { font-size: 1rem; }
+        .axes-uid { font-size: 10px; padding: 3px 8px; }
+        .axes-id-data-grid { gap: 10px; padding-top: 15px; }
+        .axes-data-box label { font-size: 0.6rem; letter-spacing: 1px; }
+        .axes-data-box span { font-size: 0.85rem; }
+
+        .custom-alert { top: auto; bottom: 20px; left: 10px; right: 10px; padding: 12px 16px; font-size: 0.85rem; }
+    }
+
+    @media (max-width: 480px) {
+        body { padding: 0.5rem; }
+        
+        .header { padding: 0.75rem; border-radius: 16px; }
+        .doctor-avatar { width: 40px; height: 40px; }
+        .doctor-avatar i { font-size: 1.2rem; }
+        .header-info h1 { font-size: 1.1rem; }
+        #current-time { font-size: 0.7rem; }
+        
+        .card { padding: 0.75rem; border-radius: 16px; }
+        .card-title h3 { font-size: 0.9rem; }
+        .icon-box { width: 28px; height: 28px; font-size: 0.8rem; }
+        
+        table { border-spacing: 0 4px; }
+        th { font-size: 0.55rem; padding: 0 0.4rem 0.4rem; }
+        td { padding: 0.6rem 0.4rem; }
+        .avatar-sm { width: 28px; height: 28px; font-size: 0.7rem; }
+        .name-text { font-size: 0.8rem; }
+        .ref-text { font-size: 0.65rem; }
+        
+        td .btn-action { padding: 0.35rem 0.5rem; font-size: 0.65rem; white-space: nowrap; }
+        
+        .axes-photo-frame { width: 60px; height: 60px; }
+        .axes-photo-frame i { font-size: 20px; }
+        .axes-name { font-size: 0.9rem; }
+        .axes-uid { font-size: 9px; }
+    }
   </style>
 </head>
 
@@ -280,6 +220,14 @@
 
 <div class="orb orb-1"></div>
 <div class="orb orb-2"></div>
+
+<div th:if="${msg}" id="msgAlert" class="custom-alert">
+    <i class="fas fa-info-circle" style="color:#10b981"></i>
+    <span th:text="${msg}">Notification</span>
+    <button onclick="document.getElementById('msgAlert').style.display='none'" style="background:none;border:none;color:#94a3b8;cursor:pointer;margin-left:auto;">
+      <i class="fas fa-times"></i>
+    </button>
+</div>
 
 <div class="container">
 
@@ -292,7 +240,7 @@
         </div>
       </div>
       <div class="header-info">
-        <h1 th:text="'Dr. ' + ${doctorName}">Dr. Alexander Reed</h1>
+        <h1 th:text="'Dr. ' + ${doctorName}">Dr. Name</h1>
         <div id="current-time">Connecting...</div>
       </div>
     </div>
@@ -307,13 +255,14 @@
     <section class="main-section">
       <div class="card">
         <div class="card-title">
-          <h3><div class="icon-box"><i class="fas fa-calendar-check"></i></div>Upcoming Schedule</h3>
+          <h3><div class="icon-box"><i class="fas fa-calendar-check"></i></div>Schedule</h3>
           <a th:href="@{/doctor/appointments/manage}" class="btn-action btn-outline">Manage</a>
         </div>
 
         <div class="table-container">
-          <div th:if="${appointments == null or #lists.isEmpty(appointments)}" style="color: var(--text-dim); text-align: center; padding: 20px;">
-              No upcoming appointments found.
+          <div th:if="${appointments == null or #lists.isEmpty(appointments)}" style="color: var(--text-dim); text-align: center; padding: 20px 0; font-size: 0.9rem;">
+              <i class="far fa-calendar-times" style="font-size: 1.5rem; margin-bottom: 8px; opacity: 0.5;"></i>
+              <p>No upcoming appointments.</p>
           </div>
 
           <table th:if="${appointments != null and !#lists.isEmpty(appointments)}">
@@ -327,26 +276,23 @@
             <tbody id="appointment-body">
               <tr th:each="a : ${appointments}">
                 <td>
-                  <div style="display: flex; align-items: center; gap: 1rem;">
-                    <div class="avatar-sm" th:text="${a.patient != null ? #strings.substring(a.patient.name,0,1) : 'P'}">P</div>
+                  <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <div class="avatar-sm" th:text="${a.patient != null ? #strings.substring(a.patient.name,0,1) : '?'}">?</div>
                     <div>
-                      <div class="name-text" th:text="${a.patient?.name}">Patient Name</div>
-                      <div class="ref-text">Ref: #<span th:text="${a.id}">102</span></div>
+                      <div class="name-text" th:text="${a.patient != null ? a.patient.name : 'Unknown'}">Name</div>
+                      <div class="ref-text">Ref: <span th:text="${a.id}">102</span></div>
                     </div>
                   </div>
                 </td>
                 <td>
-                  <div style="font-weight: 700; color: #7dd3fc; display: flex; align-items: center; gap: 6px;">
-                    <i class="far fa-clock"></i>
-                    <span th:text="${a.appointmentTime}">10:30 AM</span>
+                  <div style="font-weight: 700; color: #7dd3fc; display: flex; align-items: center; gap: 4px; font-size: 0.85rem;">
+                    <span th:text="${#temporals.format(a.appointmentTime, 'dd MMM, h:mm a')}">10:30 AM</span>
                   </div>
                 </td>
                 <td style="text-align: right;">
-                  <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
-                    <a class="btn-action btn-primary" th:href="@{'/doctor/records/new'(appointmentId=${a.id})}">
-                      Record
-                    </a>
-                    <a class="btn-action btn-outline" th:href="@{'/doctor/appointments/' + ${a.id}}">
+                  <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                    <a class="btn-action btn-primary" th:href="@{'/doctor/records/new'(appointmentId=${a.id})}">Record</a>
+                    <a class="btn-action btn-outline" th:href="@{'/doctor/appointments/' + ${a.id}}" style="padding: 0.4rem 0.6rem;">
                       <i class="fas fa-chevron-right"></i>
                     </a>
                   </div>
@@ -363,7 +309,7 @@
       <div class="card axes-id-card">
         <div class="axes-id-header">
             <div class="axes-logo">AXES</div>
-            <div class="axes-id-label">Verified Doctor ID</div>
+            <div class="axes-id-label">ID CARD</div>
         </div>
         
         <div class="axes-id-content">
@@ -380,41 +326,40 @@
 
             <div class="axes-id-data-grid">
                 <div class="axes-data-box">
-                    <label>Specialization</label>
-                    <span th:text="${doctor?.specialization ?: 'General Medicine'}">Cardiology</span>
+                    <label>Specialty</label>
+                    <span th:text="${doctor?.specialization ?: 'General'}">Gen</span>
                 </div>
                 <div class="axes-data-box">
                     <label>Status</label>
-                    <span th:if="${doctor?.approved}" style="color:#4ade80"><i class="fas fa-check-circle"></i> Active</span>
+                    <span th:if="${doctor?.approved}" style="color:#4ade80">Active</span>
                     <span th:unless="${doctor?.approved}" style="color:#f87171">Pending</span>
                 </div>
-                <div class="axes-data-box">
-                    <label>Email Contact</label>
-                    <span style="font-size:12px" th:text="${doctor?.email}">email@doc.com</span>
-                </div>
             </div>
 
-            <div class="axes-chip">
-                <div class="axes-chip-icon"></div>
-                <div class="axes-chip-text">Encrypted Access Token</div>
-            </div>
-
-            <a th:href="@{/doctor/details}" class="btn-action btn-outline" style="width:100%; justify-content: center; font-size:12px; margin-top: 24px;">
-               <i class="fas fa-cog"></i> Profile Settings
+            <a th:href="@{/doctor/details}" class="btn-action btn-outline" style="width:100%; justify-content: center; font-size:0.8rem; margin-top: 20px; padding: 0.6rem;">
+               <i class="fas fa-cog" style="margin-right:5px"></i> Settings
             </a>
         </div>
       </div>
 
-      <div class="card" style="margin-top: 24px;">
+      <div class="card" style="margin-top: 1rem;">
         <div class="card-title">
             <h3><div class="icon-box"><i class="fas fa-folder-open"></i></div> Archives</h3>
         </div>
-        <p style="color:var(--text-dim); font-size:0.9rem; margin-bottom:1.5rem; line-height:1.6;">
-            Access full patient history, past diagnoses, and medical records database.
-        </p>
         <a th:href="@{/doctor/records}" class="btn-action btn-primary" style="width:100%; justify-content:center;">
-            <i class="fas fa-search"></i> Access Records
+            Access Records
         </a>
+      </div>
+
+      <div class="card border-danger" style="margin-top: 1rem;">
+        <div class="card-title" style="margin-bottom: 0.5rem;">
+            <h3 class="text-danger" style="font-size: 0.9rem;"><i class="fas fa-exclamation-triangle"></i> Danger Zone</h3>
+        </div>
+        <form th:action="@{/doctor/deleteAccount}" method="POST" onsubmit="return confirm('WARNING: Are you sure you want to delete your Doctor profile? This is permanent.');">
+            <button type="submit" class="btn-action btn-outline-danger">
+                Delete Profile
+            </button>
+        </form>
       </div>
 
     </aside>
@@ -425,7 +370,7 @@
 <script>
   function updateTime(){
     const now = new Date();
-    const options = { weekday: 'long', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+    const options = { weekday: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
     document.getElementById("current-time").innerHTML = 
       `<i class="far fa-calendar-alt" style="margin-right: 6px; color: #38bdf8"></i>` + 
       now.toLocaleString('en-US', options);
@@ -433,6 +378,16 @@
 
   updateTime();
   setInterval(updateTime, 60000);
+
+  // Auto-hide alert
+  setTimeout(function() {
+      var alertBox = document.getElementById('msgAlert');
+      if (alertBox) {
+          alertBox.style.transition = "opacity 0.5s ease";
+          alertBox.style.opacity = "0";
+          setTimeout(function() { alertBox.style.display = "none"; }, 500);
+      }
+  }, 5000);
 </script>
 
 </body>

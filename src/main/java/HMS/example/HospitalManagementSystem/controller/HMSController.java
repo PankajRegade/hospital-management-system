@@ -61,6 +61,7 @@ public class HMSController {
         if (p.getAge() <= 0) return true;
         return false;
     }
+    
 
     // ---------- helper to check if doctor profile is incomplete ----------
     private boolean isDoctorProfileIncomplete(Doctor d) {
@@ -157,9 +158,9 @@ public class HMSController {
                 return "login";
             }
 
-            // -----------------------------------------------------------
-            // 🛑 NEW LOGIC: SINGLE SESSION ENFORCEMENT
-            // -----------------------------------------------------------
+            
+            // NEW LOGIC: SINGLE SESSION ENFORCEMENT
+           
             if (activeUserSessions.containsKey(uname)) {
                 HttpSession existingSession = activeUserSessions.get(uname);
                 try {
@@ -176,10 +177,10 @@ public class HMSController {
                     activeUserSessions.remove(uname);
                 }
             }
-            // -----------------------------------------------------------
+          
 
 
-            // 1.5) Email verification check
+            // 1) Email verification check
             if (("patient".equalsIgnoreCase(r) || "doctor".equalsIgnoreCase(r)) &&
                     (dblogin.getEmailVerified() == null || !dblogin.getEmailVerified())) {
                 tx.commit();
@@ -212,7 +213,7 @@ public class HMSController {
                     httpSession.setAttribute("role", "patient");
                     httpSession.setAttribute("username", uname);
 
-                    // ✅ REGISTER SESSION IN MAP
+                   
                     activeUserSessions.put(uname, httpSession);
 
                     if (incomplete) return "redirect:/patient/details";
@@ -254,7 +255,7 @@ public class HMSController {
 
                     tx.commit();
                     
-                    // ✅ REGISTER SESSION IN MAP
+                   
                     activeUserSessions.put(uname, httpSession);
 
                     if (incomplete) return "redirect:/doctor/details";
@@ -266,7 +267,7 @@ public class HMSController {
                     httpSession.setAttribute("role", "admin");
                     httpSession.setAttribute("username", uname);
                     
-                    // ✅ REGISTER SESSION IN MAP (Optional: remove if admins can multi-login)
+                  
                     activeUserSessions.put(uname, httpSession);
                     
                     return "redirect:/admin/dashboard";
@@ -495,28 +496,172 @@ public class HMSController {
         } finally {
             session.close();
         }
-    }
+    }// ---------- DELETE DOCTOR ACCOUNT ----------
+    @PostMapping("/doctor/deleteAccount")
+    public String deleteDoctorAccount(HttpSession session, Model model) {
+        Object didObj = session.getAttribute("doctorId");
+        Object unameObj = session.getAttribute("username");
 
-    // ---------- RESET PASSWORD (FORM) ----------
+        if (didObj == null || unameObj == null) {
+            model.addAttribute("msg", "Session expired.");
+            return "home";
+        }
+
+        Long doctorId = (didObj instanceof Long) ? (Long) didObj : Long.parseLong(didObj.toString());
+        String username = unameObj.toString();
+
+        Session ss = sf.openSession();
+        Transaction tx = null;
+        try {
+            tx = ss.beginTransaction();
+
+            Doctor d = ss.get(Doctor.class, doctorId);
+            Login l = ss.get(Login.class, username);
+
+            if (d != null) {
+                // 1. Delete Photo file if exists
+                if (d.getPhotoPath() != null) {
+                    try {
+                        String projectDir = System.getProperty("user.dir");
+                        String storedPath = d.getPhotoPath();
+                        if (storedPath.startsWith("/") || storedPath.startsWith("\\")) {
+                            storedPath = storedPath.substring(1);
+                        }
+                        Path path = Paths.get(projectDir, storedPath);
+                        Files.deleteIfExists(path);
+                    } catch (Exception e) {
+                         // ignore file error
+                    }
+                }
+
+                // 2. Handle Appointments (Set doctor to null OR delete them)
+                // Usually we keep appointments but set doctor_id to null so patient history remains.
+                // But for hard delete:
+                Query<?> qAppt = ss.createQuery("delete from Appointment a where a.doctor.id = :did");
+                qAppt.setParameter("did", doctorId);
+                qAppt.executeUpdate();
+
+                // 3. Delete Doctor Profile
+                ss.delete(d);
+            }
+
+            if (l != null) {
+                // 4. Delete Login
+                ss.delete(l);
+            }
+
+            tx.commit();
+
+            // 5. Logout
+            activeUserSessions.remove(username);
+            session.invalidate();
+
+            model.addAttribute("msg", "Doctor account deleted successfully.");
+            return "home";
+
+        } catch (Exception ex) {
+            if (tx != null) tx.rollback();
+            ex.printStackTrace();
+            model.addAttribute("msg", "Error deleting account: " + ex.getMessage());
+            return "redirect:/doctor/dashboard";
+        } finally {
+            ss.close();
+        }
+        }
+    
+    // ---------- DELETE PATIENT ACCOUNT ----------
+    @PostMapping("/patient/deleteAccount")
+    public String deletePatientAccount(HttpSession session, Model model) {
+        // 1. Check Session
+        Object pidObj = session.getAttribute("patientId");
+        Object unameObj = session.getAttribute("username");
+
+        if (pidObj == null || unameObj == null) {
+            model.addAttribute("msg", "Session expired. Please login again.");
+            return "home";
+        }
+
+        Long patientId = (pidObj instanceof Long) ? (Long) pidObj : Long.parseLong(pidObj.toString());
+        String username = unameObj.toString();
+
+        Session ss = sf.openSession();
+        Transaction tx = null;
+        try {
+            tx = ss.beginTransaction();
+
+            // 2. Load the Patient and Login entities
+            Patient p = ss.get(Patient.class, patientId);
+            Login l = ss.get(Login.class, username);
+
+            if (p != null) {
+                // --- STEP A: Delete Appointments (Foreign Key Constraint) ---
+                ss.createQuery("delete from Appointment a where a.patient.id = :pid")
+                  .setParameter("pid", patientId)
+                  .executeUpdate();
+
+                // --- STEP B: Delete Messages ---
+                ss.createQuery("delete from Message m where m.patient.id = :pid")
+                  .setParameter("pid", patientId)
+                  .executeUpdate();
+
+                // --- STEP C: Delete Medical Records ---
+                ss.createQuery("delete from MedicalRecord m where m.patient.id = :pid")
+                  .setParameter("pid", patientId)
+                  .executeUpdate();
+
+                // --- STEP D: Delete the Patient Profile ---
+                ss.delete(p);
+            }
+
+            if (l != null) {
+                // --- STEP E: Delete the Login Credential ---
+                ss.delete(l);
+            }
+
+            tx.commit();
+
+            // 3. Logout the user
+            activeUserSessions.remove(username);
+            session.invalidate();
+
+            model.addAttribute("msg", "Your account has been permanently deleted.");
+            return "home";
+
+        } catch (Exception ex) {
+            if (tx != null) tx.rollback();
+            ex.printStackTrace();
+            model.addAttribute("msg", "Error deleting account: " + ex.getMessage());
+            return "redirect:/patient/dashboard";
+        } finally {
+            ss.close();
+        }
+    }
+ // ---------- RESET PASSWORD (FORM) ----------
     @GetMapping("/resetPassword")
-    public String resetPasswordPage(@RequestParam("username") String username,
+    public String resetPasswordPage(@RequestParam(value = "username", required = false) String usernameFromUrl,
                                     @RequestParam("code") String code,
                                     Model model) {
 
+        System.out.println("DEBUG: Link Clicked. Code: " + code);
+
         Session session = sf.openSession();
         try {
-            Login login = session.get(Login.class, username.trim());
-            if (login == null ||
-                    login.getVerificationCode() == null ||
-                    !login.getVerificationCode().equals(code)) {
+            
+            Query<Login> q = session.createQuery("from Login where verificationCode = :code", Login.class);
+            q.setParameter("code", code);
+            Login login = q.uniqueResult();
 
+            // 1. Check if user exists with this code
+            if (login == null) {
+                System.out.println("DEBUG: No user found for code: " + code);
                 model.addAttribute("msg", "Invalid or expired reset link.");
                 return "home";
             }
 
-            // pass username & code to the form
-            model.addAttribute("username", username);
+           
+            model.addAttribute("username", login.getUsername()); 
             model.addAttribute("code", code);
+            
             return "reset_password";
 
         } catch (Exception ex) {
@@ -565,8 +710,8 @@ public class HMSController {
             }
 
             // update password
-            login.setPassword(password.trim());          // (you can hash here)
-            login.setVerificationCode(null);             // clear token
+            login.setPassword(password.trim());         
+            login.setVerificationCode(null);            
             session.update(login);
             tx.commit();
 
@@ -1511,3 +1656,6 @@ public class HMSController {
     }
 
 }
+
+
+
