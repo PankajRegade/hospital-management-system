@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cardiology Department - Medical Center</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a1628 0%, #1a2332 50%, #0d1b2a 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Header Styles */
+        header {
+            background: rgba(10, 22, 40, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1.5rem 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 30px rgba(0, 255, 157, 0.1);
+            border-bottom: 1px solid rgba(0, 255, 157, 0.2);
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #00ff9d 0%, #00d4ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { filter: drop-shadow(0 0 10px rgba(0, 255, 157, 0.5)); }
+            50% { filter: drop-shadow(0 0 20px rgba(0, 212, 255, 0.5)); }
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        nav a {
+            color: #e0e0e0;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            position: relative;
+            padding: 0.5rem 0;
+        }
+
+        nav a:hover {
+            color: #00ff9d;
+        }
+
+        nav a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #00ff9d, #00d4ff);
+            transition: width 0.3s ease;
+        }
+
+        nav a:hover::after {
+            width: 100%;
+        }
+
+        /* Hero Section */
+        .hero {
+            margin-top: 80px;
+            padding: 4rem 2rem;
+            text-align: center;
+            background: linear-gradient(135deg, rgba(0, 255, 157, 0.1) 0%, rgba(0, 212, 255, 0.1) 100%);
+            border-bottom: 2px solid rgba(0, 255, 157, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(0, 255, 157, 0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #00ff9d 0%, #00d4ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: fadeInUp 1s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: #b0b0b0;
+            animation: fadeInUp 1s ease 0.2s both;
+        }
+
+        /* Main Content */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+        }
+
+        .section {
+            margin-bottom: 4rem;
+            animation: fadeInUp 1s ease;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            background: linear-gradient(135deg, #00ff9d 0%, #00d4ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Services Grid */
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .service-card {
+            background: rgba(26, 35, 50, 0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid rgba(0, 255, 157, 0.2);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .service-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(0, 255, 157, 0.1) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .service-card:hover::before {
+            opacity: 1;
+        }
+
+        .service-card:hover {
+            transform: translateY(-10px);
+            border-color: #00ff9d;
+            box-shadow: 0 10px 40px rgba(0, 255, 157, 0.3);
+        }
+
+        .service-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 15px;
+            margin-bottom: 1.5rem;
+        }
+
+        .service-card h3 {
+            color: #00ff9d;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .service-card p {
+            color: #b0b0b0;
+            line-height: 1.6;
+        }
+
+        /* Team Section */
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .team-card {
+            background: rgba(26, 35, 50, 0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .team-card:hover {
+            transform: translateY(-10px);
+            border-color: #00d4ff;
+            box-shadow: 0 10px 40px rgba(0, 212, 255, 0.3);
+        }
+
+        .team-card img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 1rem;
+            border: 3px solid #00d4ff;
+        }
+
+        .team-card h3 {
+            color: #00d4ff;
+            margin-bottom: 0.5rem;
+        }
+
+        .team-card .role {
+            color: #00ff9d;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .team-card p {
+            color: #b0b0b0;
+            font-size: 0.9rem;
+        }
+
+        /* CTA Button */
+        .cta-button {
+            display: inline-block;
+            padding: 1rem 2.5rem;
+            background: linear-gradient(135deg, #00ff9d 0%, #00d4ff 100%);
+            color: #0a1628;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin-top: 2rem;
+            box-shadow: 0 5px 20px rgba(0, 255, 157, 0.3);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(0, 255, 157, 0.5);
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        /* Footer */
+        footer {
+            background: rgba(10, 22, 40, 0.95);
+            padding: 2rem;
+            text-align: center;
+            border-top: 1px solid rgba(0, 255, 157, 0.2);
+            margin-top: 4rem;
+        }
+
+        footer p {
+            color: #b0b0b0;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            nav ul {
+                gap: 1rem;
+            }
+            
+            .services-grid,
+            .team-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">Axes</div>
+            <ul>
+                <li><a href="#" th:href="@{/}">Home</a></li>
+                <li><a href="#services">Services</a></li>
+                <li><a href="#team">Our Team</a></li>
+                <li><a href="#" th:href="@{/contactPage}">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Cardiology Department</h1>
+            <p>Advanced Heart Care with Cutting-Edge Technology and Compassionate Experts</p>
+        </div>
+    </section>
+
+    <div class="container">
+        <section class="section" id="services">
+            <h2 class="section-title">Our Cardiology Services</h2>
+            
+            <div class="services-grid">
+                <div class="service-card">
+                    <img src="https://images.unsplash.com/photo-1628348068343-c6a848d2b6dd?w=800&q=80" alt="Cardiac Imaging">
+                    <h3>Advanced Cardiac Imaging</h3>
+                    <p>State-of-the-art echocardiography, CT, and MRI scans for precise diagnosis of heart conditions.</p>
+                </div>
+
+                <div class="service-card">
+                    <img src=https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTzCyWULLUrfVkxTZkGxsy6nTLZrh9fYtSV0A&s alt="Heart Surgery">
+                    <h3>Interventional Cardiology</h3>
+                    <p>Minimally invasive procedures including angioplasty, stenting, and catheterization.</p>
+                </div>
+
+                <div class="service-card">
+                    <img src="https://images.unsplash.com/photo-1516549655169-df83a0774514?w=800&q=80" alt="Heart Monitoring">
+                    <h3>Cardiac Monitoring</h3>
+                    <p>24/7 monitoring services with Holter monitors and advanced telemetry systems.</p>
+                </div>
+
+                <div class="service-card">
+                    <img src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=800&q=80" alt="Heart Rehabilitation">
+                    <h3>Cardiac Rehabilitation</h3>
+                    <p>Comprehensive recovery programs designed to restore heart health and improve quality of life.</p>
+                </div>
+
+                <div class="service-card">
+                    <img src="https://images.unsplash.com/photo-1551076805-e1869033e561?w=800&q=80" alt="Preventive Cardiology">
+                    <h3>Preventive Cardiology</h3>
+                    <p>Risk assessment, lifestyle counseling, and preventive strategies to maintain heart health.</p>
+                </div>
+
+                <div class="service-card">
+                    <img src="https://images.unsplash.com/photo-1631815588090-d4bfec5b1ccb?w=800&q=80" alt="Emergency Cardiac Care">
+                    <h3>Emergency Cardiac Care</h3>
+                    <p>24/7 emergency services for heart attacks, arrhythmias, and other cardiac emergencies.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="team">
+            <h2 class="section-title">Meet Our Cardiologists</h2>
+            
+            <div class="team-grid">
+                
+                <div class="team-card" th:each="doc : ${cardiologists}">
+                    <img th:if="${doc.photoPath != null}" th:src="@{${doc.photoPath}}" alt="Doctor Photo">
+                    <img th:if="${doc.photoPath == null}" src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400&q=80" alt="Default Doctor Photo">
+
+                    <h3 th:text="${doc.name}">Doctor Name</h3>
+                    
+                    <p class="role" th:text="${doc.specialization}">Cardiologist</p>
+                    
+                    <p th:text="${doc.bio != null ? doc.bio : 'Expert specialist in advanced cardiovascular treatments and patient care.'}">
+                        Doctor description goes here.
+                    </p>
+                </div>
+
+                <div th:if="${#lists.isEmpty(cardiologists)}" style="grid-column: 1/-1; text-align: center; padding: 2rem;">
+                    <p style="color: #b0b0b0; font-size: 1.1rem;">No cardiology specialists are currently available for display.</p>
+                </div>
+
+            </div>
+        </section>
+        <section class="section text-center">
+            <h2 class="section-title">Schedule Your Consultation</h2>
+            <p style="color: #b0b0b0; margin-bottom: 2rem; max-width: 600px; margin-left: auto; margin-right: auto;">
+                Take the first step towards better heart health. Our expert team is ready to provide personalized care tailored to your needs.
+            </p>
+            <a href="#" th:href="@{/login}" class="cta-button">Book Appointment</a>
+        </section>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Axes Cardiology Department. All rights reserved.</p>
+        <p style="margin-top: 0.5rem; font-size: 0.9rem;">Advanced Heart Care • Compassionate Service • Proven Results</p>
+    </footer>
+</body>
+</html>

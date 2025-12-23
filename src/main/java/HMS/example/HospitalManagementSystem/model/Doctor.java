@@ -7,44 +7,55 @@ import java.time.LocalDateTime;
 @Table(name = "doctor")
 public class Doctor {
 
-    // ---------------- APPROVAL FIELDS ----------------
-
-    @Column(nullable = false)
-    private boolean approved = false;     // default: waiting for admin approval
-
-    @Column(name = "approved_at")
-    private LocalDateTime approvedAt;     // timestamp when admin approves doctor
-
-
-    // ---------------- BASIC FIELDS -------------------
+    // ---------------- PRIMARY KEY ----------------
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // ---------------- BASIC DETAILS ----------------
+
+    @Column(nullable = false)
     private String name;
 
+    @Column(nullable = false, unique = true)
     private String email;
 
     private String phone;
 
-    @Column(name = "specialization")
+    @Column(nullable = false)
     private String specialization;
 
-    // ---- NEW FIELD: PROFILE PHOTO PATH (relative URL like /uploads/doctor-1.jpg) ----
+    // ---------------- PROFILE INFO ----------------
+
+    // Short professional description (USED BY CARDIOLOGY PAGE)
+    @Column(columnDefinition = "TEXT")
+    private String bio;
+
+    // Relative URL like /uploads/doctor-1.jpg
     @Column(name = "photo_path")
     private String photoPath;
 
-    // ---- NEW FIELD: has doctor completed initial details? ----
+    // Has doctor completed profile details?
     @Column(name = "details_completed", nullable = false)
     private Boolean detailsCompleted = Boolean.FALSE;
 
+    // ---------------- APPROVAL FLOW ----------------
 
-    // ---------------- CONSTRUCTORS -------------------
+    @Column(nullable = false)
+    private boolean approved = false;
+
+    @Column(nullable = false)
+    private boolean rejected = false;
+
+    @Column(name = "approved_at")
+    private LocalDateTime approvedAt;
+
+    // ---------------- CONSTRUCTORS ----------------
 
     public Doctor() {}
 
-    // ---------------- GETTERS & SETTERS --------------
+    // ---------------- GETTERS & SETTERS ------------
 
     public Long getId() {
         return id;
@@ -86,12 +97,52 @@ public class Doctor {
         this.specialization = specialization;
     }
 
+    // ---------- BIO (FIXES 500 ERROR) ----------
+
+    public String getBio() {
+        return bio;
+    }
+
+    public void setBio(String bio) {
+        this.bio = bio;
+    }
+
+    // ---------- PHOTO PATH ----------
+
+    public String getPhotoPath() {
+        return photoPath;
+    }
+
+    public void setPhotoPath(String photoPath) {
+        this.photoPath = photoPath;
+    }
+
+    // ---------- DETAILS COMPLETED ----------
+
+    public Boolean getDetailsCompleted() {
+        return detailsCompleted != null && detailsCompleted;
+    }
+
+    public void setDetailsCompleted(Boolean detailsCompleted) {
+        this.detailsCompleted = detailsCompleted;
+    }
+
+    // ---------- APPROVAL ----------
+
     public boolean isApproved() {
         return approved;
     }
 
     public void setApproved(boolean approved) {
         this.approved = approved;
+    }
+
+    public boolean isRejected() {
+        return rejected;
+    }
+
+    public void setRejected(boolean rejected) {
+        this.rejected = rejected;
     }
 
     public LocalDateTime getApprovedAt() {
@@ -102,54 +153,21 @@ public class Doctor {
         this.approvedAt = approvedAt;
     }
 
-    // ---- NEW GETTER/SETTER FOR PHOTO PATH ----
-
-    public String getPhotoPath() {
-        return photoPath;
-    }
-
-    public void setPhotoPath(String photoPath) {
-        this.photoPath = photoPath;
-    }
-
-    // ---- NEW GETTER/SETTER FOR details_completed ----
-
-    /**
-     * Returns true when detailsCompleted is non-null and true.
-     * Keeps compatibility with code that calls getDetailsCompleted().
-     */
-    public Boolean getDetailsCompleted() {
-        return detailsCompleted != null && detailsCompleted;
-    }
-
-    public void setDetailsCompleted(Boolean detailsCompleted) {
-        this.detailsCompleted = detailsCompleted;
-    }
-
-    // ---------------- TO STRING -----------------------
+    // ---------------- TO STRING ----------------
 
     @Override
     public String toString() {
         return "Doctor{" +
                 "id=" + id +
-                ", name='" + name + '\'' +
+                ", name='" + name  + '\'' +
                 ", email='" + email + '\'' +
                 ", phone='" + phone + '\'' +
                 ", specialization='" + specialization + '\'' +
                 ", approved=" + approved +
+                ", rejected=" + rejected +
                 ", approvedAt=" + approvedAt +
                 ", photoPath='" + photoPath + '\'' +
                 ", detailsCompleted=" + detailsCompleted +
                 '}';
     }
-
-	public void setRejected(boolean b) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public boolean isRejected() {
-		// TODO Auto-generated method stub
-		return false;
-	}
 }

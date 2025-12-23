@@ -306,7 +306,6 @@ public class HMSController {
     public String signupPage() {
         return "signup";
     }
-
     @RequestMapping("/signup")
     public String signup(@ModelAttribute Login login, Model model) {
 
@@ -361,6 +360,7 @@ public class HMSController {
             tx.commit();
             session.close();
 
+            // 3) Send Verification Email
             try {
                 String encodedUser = URLEncoder.encode(uname, "UTF-8");
                 String encodedCode = URLEncoder.encode(code, "UTF-8");
@@ -371,12 +371,19 @@ public class HMSController {
                 log.error("Failed to send verification email to {}: {}", uname, mailEx.toString(), mailEx);
             }
 
+            // --- KEY CHANGE HERE ---
+            // Pass the username to the view so the "Resend" button works automatically
+            model.addAttribute("username", uname);
+            
             model.addAttribute("msg", "Sign up successful. Please check your email to verify your account before login.");
-            return "home";
+            return "verify_pending";
 
         } catch (Exception ex) {
             if (tx != null) tx.rollback();
-            session.close();
+            // Ensure session is closed if an error occurs while it's still open
+            if (session.isOpen()) {
+                session.close();
+            }
             ex.printStackTrace();
             model.addAttribute("msg", "Error during signup: " + ex.getMessage());
             return "signup";
@@ -422,7 +429,7 @@ public class HMSController {
             emailService.sendVerificationEmail(username, link);
 
             model.addAttribute("msg", "Verification email sent again.");
-            return "home";
+            return "verify_pending";
 
         } catch (Exception e) {
             if (tx != null) tx.rollback();
@@ -1080,6 +1087,62 @@ public class HMSController {
 
     @RequestMapping("aboutPage")
     public String about() { return "about"; }
+    
+    
+    @GetMapping("/cardiologyPage")
+    public String cardiologyPage(Model model) {
+        Session session = sf.openSession();
+
+        List<Doctor> cardiologists = session.createQuery(
+            "FROM Doctor d WHERE d.specialization = :spec AND d.approved = true",
+            Doctor.class
+        ).setParameter("spec", "Cardiology")
+         .getResultList();
+
+        model.addAttribute("cardiologists", cardiologists);
+        return "cardiology"; // cardiology.html
+    }
+
+    @GetMapping("/neurologyPage")
+    public String neurologyPage(Model model) {
+        Session session = sf.openSession();
+
+        List<Doctor> neurologys = session.createQuery(
+            "FROM Doctor d WHERE d.specialization = :spec AND d.approved = true",
+            Doctor.class
+        ).setParameter("spec", "Neurology")
+         .getResultList();
+
+        model.addAttribute("neurologys", neurologys);
+        return "neurology"; // neurology.html
+    }
+    
+    @GetMapping("/pediatricPage")
+    public String pediatricPage(Model model) {
+        Session session = sf.openSession();
+
+        List<Doctor> pediatrics = session.createQuery(
+            "FROM Doctor d WHERE d.specialization = :spec AND d.approved = true",
+            Doctor.class
+        ).setParameter("spec", "Pediatric")
+         .getResultList();
+
+        model.addAttribute("pediatrics", pediatrics);
+        return "pediatric"; //pediatric.html
+    }
+    @GetMapping("/surgeryPage")
+    public String surgeryPage(Model model) {
+        Session session = sf.openSession();
+
+        List<Doctor> surgerys = session.createQuery(
+            "FROM Doctor d WHERE d.specialization = :spec AND d.approved = true",
+            Doctor.class
+        ).setParameter("spec", "Surgeons")
+         .getResultList();
+
+        model.addAttribute("surgerys", surgerys);
+        return "surgery"; //surgery.html
+    }
 
     @RequestMapping("contactPage")
     public String contact() { return "contact"; }
